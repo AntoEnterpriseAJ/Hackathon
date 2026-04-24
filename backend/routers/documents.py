@@ -93,12 +93,14 @@ async def parse_document(file: UploadFile = File(...)) -> ExtractedDocument:
         )
 
     try:
+        _markdown_fn = None
         if is_image:
             source_route = "image"
             page_images = scan_extractor.extract_page_images(
                 file_bytes, filename, is_pdf=False
             )
             raw = claude_service.extract_from_images(page_images)
+            _markdown_fn = lambda: claude_service.generate_markdown_from_images(page_images)  # noqa: E731
 
         else:  # PDF
             route = pdf_router.detect_route(file_bytes)
@@ -107,14 +109,29 @@ async def parse_document(file: UploadFile = File(...)) -> ExtractedDocument:
             if route == "text_pdf":
                 text = text_extractor.extract_text(file_bytes)
                 raw = claude_service.extract_from_text(text)
+                _markdown_fn = lambda: claude_service.generate_markdown_from_text(text)  # noqa: E731
             else:  # scanned_pdf
-                page_images = scan_extractor.extract_page_images(
-                    file_bytes, filename, is_pdf=True
-                )
-                raw = claude_service.extract_from_images(page_images)
+                num_pages = scan_extractor.count_pdf_pages(file_bytes)
+                if num_pages > scan_extractor._PAGE_BATCH_THRESHOLD:
+                    raw = claude_service.extract_from_images_paged(file_bytes)
+                    _markdown_fn = lambda: claude_service.generate_markdown_from_images_paged(file_bytes)  # noqa: E731
+                else:
+                    page_images = scan_extractor.extract_page_images(
+                        file_bytes, filename, is_pdf=True
+                    )
+                    raw = claude_service.extract_from_images(page_images)
+                    _markdown_fn = lambda: claude_service.generate_markdown_from_images(page_images)  # noqa: E731
 
         raw = _normalize_extracted_payload(raw)
-        return ExtractedDocument(**raw, source_route=source_route)
+        extracted = ExtractedDocument(**raw, source_route=source_route)
+
+        if _markdown_fn is not None:
+            try:
+                extracted.markdown_content = _markdown_fn()
+            except Exception as md_exc:
+                print(f"Markdown generation failed (non-fatal): {md_exc}")
+
+        return extracted
 
     except RuntimeError as exc:
         # e.g. missing API key

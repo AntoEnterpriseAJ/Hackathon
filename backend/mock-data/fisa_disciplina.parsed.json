@@ -1,0 +1,1253 @@
+{
+  "document_type": "FIȘA DISCIPLINEI",
+  "summary": "[p1] Fișa disciplinei pentru cursul „Analiză matematică\" din cadrul Universității Transilvania din Brașov, Facultatea de Matematică și Informatică, programul INFORMATICĂ APLICATĂ / Licențiat în Informatică. Documentul conține informații despre titular, structura orelor, precondiții de curriculum și competențe, precum și condițiile de desfășurare a cursului. | [p2] Pagina 2 dintr-un formular academic românesc (F03.1-PS7.2-01/ed.3, rev.6) care conține informații despre condițiile de desfășurare a seminarului/laboratorului/proiectului și competențele specifice acumulate (profesionale) conform grilei de competențe din planul de învățământ, în cadrul competenței CP 4 – Utilizarea bazelor teoretice ale informaticii și a modelelor formale. | [p3] Acest document reprezintă o fișă de disciplină academică din învățământul superior românesc, pagina 3, conținând competențele transversale (CT1, CT2, CT3) cu rezultatele învățării asociate (R.Î.), precum și obiectivele disciplinei (generale și specifice), axate pe analiză matematică — serii numerice, serii de funcții, integrale improprii și duble. Formularul are codul de referință F03.1-PS7.2-01/ed.3, rev.6. | [p4] Aceasta este pagina 4 a unui document academic românesc (probabil o Fișă a Disciplinei), secțiunea 8 – Conținuturi, subsecțiunea 8.1 Curs. Documentul detaliază temele cursului de Analiză Matematică, metodele de predare asociate, numărul de ore alocat și săptămânile de desfășurare, pentru un total de 42 de ore de curs distribuite pe 12 săptămâni. | [p5] Pagina 5 dintr-un plan de învățământ / fișă a disciplinei de analiză matematică la nivel universitar (România). Conține sfârșitul tabelului de cursuri (secțiunea 8.1), bibliografia disciplinei și tabelul complet al activităților de seminar/laborator/proiect (secțiunea 8.2) cu metode de predare-învățare, număr de ore și săptămânile aferente. Referința formularului este F03.1-PS7.2-01/ed.3, rev.6. | [p6] Această pagină face parte dintr-o fișă a disciplinei universitare (probabil Matematică/Analiză matematică), conținând secțiunile finale ale programei analitice: tematica seminarului (săpt. 8–14), bibliografia, coroborarea conținuturilor cu așteptările comunităților epistemice și secțiunea de evaluare (10. Evaluare). Formularul are codul F03.1-PS7.2-01/ed.3, rev.6, pagina 6. | [p7] Pagina finală a unei Fișe de disciplină universitare, conținând standardul minim de performanță (secțiunea 10.6), data avizării și aprobării în Consiliul de departament și Consiliul facultății (17/07/2025), blocurile de semnătură ale Decanului, Directorului de departament și titularilor de curs/seminar, precum și notele explicative privind completarea formularului. Formularul are referința F03.1-PS7.2-01/ed.3, rev.6.",
+  "fields": [
+    {
+      "key": "form_reference",
+      "value": "F03.1-PS7.2-01/ed.3, rev.6",
+      "field_type": "id",
+      "confidence": "high"
+    },
+    {
+      "key": "institutia_de_invatamant_superior",
+      "value": "Universitatea Transilvania din Brașov",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "facultatea",
+      "value": "Matematică și Informatică",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "departamentul",
+      "value": "Matematică și Informatică",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "domeniul_de_studii_de_licenta",
+      "value": "Informatică",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "ciclul_de_studii",
+      "value": "Licență",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "programul_de_studii_calificarea",
+      "value": "INFORMATICĂ APLICATĂ/ Licențiat în Informatică",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "denumirea_disciplinei",
+      "value": "Analiză matematică",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "titularul_activitatilor_de_curs",
+      "value": "Lect. dr. Maria Dimitriu",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "titularul_activitatilor_de_seminar_laborator_proiect",
+      "value": "Lect. dr. Maria Dimitriu",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "anul_de_studiu",
+      "value": 1.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "semestrul",
+      "value": 1.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "tipul_de_evaluare",
+      "value": "E",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "regimul_disciplinei_continut",
+      "value": "DC",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "regimul_disciplinei_obligativitate",
+      "value": "DI",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "numar_ore_pe_saptamana_total",
+      "value": 5.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "ore_curs_pe_saptamana",
+      "value": 3.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "ore_seminar_laborator_proiect_pe_saptamana",
+      "value": 2.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "total_ore_plan_invatamant",
+      "value": 70.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "total_ore_curs",
+      "value": 42.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "total_ore_seminar_laborator_proiect",
+      "value": 28.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "distributia_fondului_de_timp",
+      "value": [
+        "Studiul după manual, suport de curs, bibliografie și notițe: 25 ore",
+        "Documentare suplimentară în bibliotecă, pe platformele electronice de specialitate și pe teren: 10 ore",
+        "Pregătire seminare/ laboratoare/ proiecte, teme, referate, portofolii și eseuri: 40 ore",
+        "Tutoriat: 2 ore",
+        "Examinări: 3 ore",
+        "Alte activități: 0 ore"
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "ore_studiu_manual_bibliografie_notite",
+      "value": 25.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "ore_documentare_suplimentara",
+      "value": 10.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "ore_pregatire_seminare_laboratoare",
+      "value": 40.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "ore_tutoriat",
+      "value": 2.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "ore_examinari",
+      "value": 3.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "ore_alte_activitati",
+      "value": 0.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "total_ore_activitate_student",
+      "value": 80.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "total_ore_pe_semestru",
+      "value": 150.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "numarul_de_credite",
+      "value": 6.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "preconditii_curriculum",
+      "value": [
+        "Elemente de analiză matematică din liceu."
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "preconditii_competente",
+      "value": [
+        "Calculul limitelor de șiruri și de funcții.",
+        "Derivarea funcțiilor elementare.",
+        "Integrarea funcțiilor elementare.",
+        "Reprezentarea grafică a funcțiilor."
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "conditii_desfasurare_curs",
+      "value": "Sală dotată cu minim 2 table și echipamente multimedia. Capacitatea sălii: 100 loc",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "page_number",
+      "value": 2.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_5_2_conditii_desfasurare",
+      "value": "Sală de seminar, cu tablă și minim 30 locuri",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_5_2_label",
+      "value": "5.2 de desfășurare a seminarului/ laboratorului/ proiectului",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_6_titlu",
+      "value": "Competențe specifice acumulate (conform grilei de competențe din planul de învățământ)",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "competenta_profesionala_cod",
+      "value": "CP 4",
+      "field_type": "id",
+      "confidence": "high"
+    },
+    {
+      "key": "competenta_profesionala_titlu",
+      "value": "Utilizarea bazelor teoretice ale informaticii și a modelelor formale",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "competente_profesionale_rezultate_invatare",
+      "value": [
+        "R.Î.4.1. Absolventul poate să verifice corespondența dintre capacitățile, corectitudinea și eficienta unui algoritm sau a unui sistem intențional și anumite specificații formale.",
+        "R.Î.4.2. Absolventul poate să utilizeze modele formale și teorii matematice pentru a rezolva probleme din diverse domenii ale informaticii.",
+        "R.Î.4.3. Absolventul poate să utilizeze concepte și tehnici matematice pentru a analiza și proiecta algoritmi și structuri de date folosind tehnologii specifice.",
+        "R.Î.4.4. Absolventul poate să utilizeze modele formale pentru a proiecta sisteme informatice sigure și fiabile.",
+        "R.Î.4.5. Absolventul poate să utilizeze modele formale pentru a verifica corectitudinea programelor.",
+        "R.Î.4.6. Studentul/absolventul construiește etic și responsabil soluții IT sigure și scalabile, colaborând cu specialiști din domenii conexe.",
+        "R.Î.4.7. Studentul/absolventul dezvoltă un mediu colaborativ și își asumă responsabilitatea pentru succesul livrării proiectelor la timp și conform cerințelor. Studentul/absolventul organizează echipe tehnice și gestionează ciclul de viață al proiectelor software."
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "form_reference_code",
+      "value": "F03.1-PS7.2-01/ed.3, rev.6",
+      "field_type": "id",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiune_competente",
+      "value": "Competențe transversale",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "CT1_titlu",
+      "value": "CT1 Aplicarea regulilor de muncă organizată și eficientă, a unor atitudini responsabile față de domeniul didactic-științific, pentru valorificarea creativă a propriului potențial, cu respectarea principiilor și a normelor de etică profesională",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "CT1_rezultate_invatare",
+      "value": [
+        "R.Î.1.1. Absolventul este capabil să-și organizeze și gestioneze timpul și resursele pentru a atinge obiectivele de învățare.",
+        "R.Î.1.2. Absolventul este capabil să desfășoare activitate creatoare, să se dezvolte profesional și să abordeze noi domenii, adaptându-se cerințelor nou apărute.",
+        "R.Î.1.3. Absolventul are capacitatea de a acționa în mod responsabil și etic în activitățile didactice și de cercetare, demonstrând integritate și respect față de colegi, studenți și comunitatea academică.",
+        "R.Î.1.4. Absolventul are abilitatea de a-și organiza și prioritiza activitățile pentru a asigura o muncă eficientă și productivă, respectând termenele limită și obiectivele stabilite."
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "CT2_titlu",
+      "value": "CT2 Desfășurarea eficientă a activităților organizate într-un grup inter-disciplinar și dezvoltarea capacităților empatice de comunicare inter-personală, de relaționare și colaborare cu grupuri diverse",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "CT2_rezultate_invatare",
+      "value": [
+        "R.Î.2.1. Absolventul va putea utiliza instrumente și tehnici de comunicare pentru a rezolva probleme și a dezvolta soluții inovatoare.",
+        "R.Î.2.2. Absolventul va relaționa și colabora cu grupuri diverse, inclusiv cu persoane din alte culturi sau medii socio-economice.",
+        "R.Î.2.3. Absolventul poate aplica tehnici de comunicare empatică, ascultând activ și răspunzând adecvat nevoilor și preocupărilor colegilor, contribuind astfel la crearea unui mediu de lucru armonios.",
+        "R.Î.2.4. Absolventul poate adapta stilul de comunicare în funcție de contextul cultural și diversitatea grupului, asigurându-se că mesajul este transmis eficient și este bine înțeles de toți participanții."
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "CT3_titlu",
+      "value": "CT3 Utilizarea unor metode și tehnici eficiente de învățare, informare, cercetare și dezvoltare a capacităților de valorificare a cunoștințelor, de adaptare la cerințele unei societăți dinamice și de comunicare în limba română și într-o limbă de circulație internațională",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "CT3_rezultate_invatare",
+      "value": [
+        "R.Î.3.1. Absolventul va utiliza metode și tehnici eficiente de învățare pentru a-și îmbunătăți performanța academică.",
+        "R.Î.3.2. Absolventul va utiliza instrumente și tehnici eficiente pentru a informa și comunica informații complexe într-un mod clar și concis.",
+        "R.Î.3.3. Absolventul poate evalua critic sursele de informație, identificând cele mai relevante și credibile materiale pentru a sprijini deciziile informate și fundamentate."
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiune_obiective_disciplina",
+      "value": "7. Obiectivele disciplinei (reieșind din competențele specifice acumulate)",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "obiectiv_general_disciplina",
+      "value": "Înțelegerea noțiunilor și rezultatelor fundamentale de analiză matematică și dezvoltarea abilităților de aplicare a acestora pentru rezolvarea unor probleme practice.",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "obiective_specifice_disciplina",
+      "value": [
+        "Studiul naturii seriilor numerice și a seriilor de funcții reale.",
+        "Determinarea mulțimii de convergență a unei serii de puteri.",
+        "Utilizarea dezvoltărilor Taylor.",
+        "Studiul continuității și diferențiabilității funcțiilor reale.",
+        "Determinarea punctelor de extrem local ale funcțiilor diferențiabile.",
+        "Studiul naturii integralelor improprii și calculul integralelor improprii convergente.",
+        "Calculul integralelor cu parametru",
+        "Calculul integralelor curbilinii.",
+        "Calculul integralelor duble."
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiune",
+      "value": "8. Conținuturi",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "subsectiune",
+      "value": "8.1 Curs",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "metode_de_predare",
+      "value": [
+        "Expunerea",
+        "Conversația",
+        "Problematizarea",
+        "Demonstrația",
+        "Exemplificarea"
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "teme_curs",
+      "value": [
+        "Introducere în analiza matematică. Repere bibliografice. Definiția axiomatică a mulțimii numerelor reale. Șiruri de numere reale: limită, convergență, subșir al unui șir de numere reale, operații cu șiruri, criterii de existență a limitei, criteriul de convergență al lui Cauchy.",
+        "Serii de numere reale: convergență, convergență absolută, criterii de comparație pentru serii cu termeni pozitivi, criterii directe pentru serii cu termeni pozitivi, criterii pentru serii cu termeni oarecare.",
+        "Funcții reale de o variabila reală: limite, continuitate, derivabilitate. Polinomul și formula lui Taylor. Primitive. Integrabilitatea Riemann.",
+        "Integrale improprii: definiție, exemple, criterii de convergență.",
+        "Șiruri și serii de funcții; convergență simplă și uniformă. Serii de puteri: raza de convergență; derivarea și integrarea. Dezvoltări în serie Taylor.",
+        "Spațiul Rⁿ. Limite de șiruri și funcții. Continuitate. Derivabilitatea parțială; matricea jacobiană. Diferențiabilitatea funcțiilor. Derivate parțiale de ordin superior; teorema lui Schwarz.",
+        "Diferențiala de ordin superior. Formula lui Taylor. Extremele funcțiilor diferențiabile. Funcții definite implicit. Extreme cu legături.",
+        "Lungimea unei curbe. Integrala curbilinie de speța I. Integrale curbilinii"
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_8_1_curs_continuare_topic_1",
+      "value": "de spețа a doua; independența de drum.",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_8_1_curs_continuare_topic_1_metode",
+      "value": [
+        "Exemplificarea"
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_8_1_curs_continuare_topic_2",
+      "value": "Integrale cu parametru. Integrale duble.",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_8_1_curs_continuare_topic_2_metode",
+      "value": [
+        "Expunerea",
+        "Conversația",
+        "Problematizarea",
+        "Demonstrația",
+        "Exemplificarea"
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_8_1_curs_continuare_topic_2_numar_ore",
+      "value": 6.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_8_1_curs_continuare_topic_2_saptamani",
+      "value": "Săpt. 13 - 14",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "bibliografie",
+      "value": [
+        "R. Păltănea, E. Păltănea, Elemente de analiză matematică și teoria aproximării, Editura Universității Transilvania din Brașov, 2009.",
+        "Gh. Sirețchi, Calcul diferențial și integral, vol 1-2, Editura Științifică și Enciclopedică, 1985.",
+        "O. Stănășilă, Analiză matematică, Editura Didactică și Pedagogică, 1983 (reeditată în 1993).",
+        "N. Cotfas, L. A. Cotfas, Elemente de analiză matematică, Editura Universității București, 2010",
+        "W. F. Trench, Introduction to Real Analysis (2013). Books and Monographs. Book 7. http://digitalcommons.trinity.edu/mono/7"
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_8_2_titlu",
+      "value": "8.2 Seminar/ laborator/ proiect",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "seminar_total_teme",
+      "value": 7.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "form_code",
+      "value": "F03.1-PS7.2-01/ed.3, rev.6",
+      "field_type": "id",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_9_titlu",
+      "value": "Coroborarea conținuturilor disciplinei cu așteptările reprezentanților comunităților epistemice, ale asociațiilor profesionale și ale angajatorilor reprezentativi din domeniul aferent programului",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_9_continut",
+      "value": "Conținutul disciplinei asigură cunoașterea noțiunilor și rezultatelor fundamentale necesare modelării matematice a unor fenomene, fiind corelat cu programe de studii similare din alte universități din țară și străinătate.",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_10_titlu",
+      "value": "Evaluare",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "curs_criterii_evaluare",
+      "value": "Cunoașterea și aplicarea corectă a rezultatelor teoretice fundamentale.",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "curs_metode_evaluare",
+      "value": "Examen scris.",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "curs_pondere_nota_finala",
+      "value": 80.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "seminar_criterii_evaluare",
+      "value": "Participarea activă la seminar. Studiul individual.",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "seminar_metode_evaluare",
+      "value": "Apreciere pe parcursul semestrului.",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "seminar_pondere_nota_finala",
+      "value": 20.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "sectiunea_standard_minim_performanta",
+      "value": "10.6",
+      "field_type": "id",
+      "confidence": "high"
+    },
+    {
+      "key": "nota_minima_examen",
+      "value": 5.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "tip_examen_standard_minim",
+      "value": "examenul scris",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "standard_minim_performanta",
+      "value": [
+        "Nota 5 la examenul scris.",
+        "Cunoașterea noțiunilor și rezultatelor teoretice fundamentale și aplicarea acestora pentru: studiul naturii seriilor numerice și a seriilor de funcții reale; determinarea mulțimii de convergență a unei serii de puteri; determinarea punctelor de extrem local ale funcțiilor diferențiabile; studiul naturii integralelor improprii și calculul integralelor improprii convergente; calculul integralelor curbilinii; calculul integralelor duble."
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "data_avizare_consiliu_departament",
+      "value": "2025-07-17",
+      "field_type": "date",
+      "confidence": "high"
+    },
+    {
+      "key": "data_aprobare_consiliu_facultate",
+      "value": "2025-07-17",
+      "field_type": "date",
+      "confidence": "high"
+    },
+    {
+      "key": "decan_nume",
+      "value": "Conf. dr. Ion Gabriel Stan",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "decan_titlu_functie",
+      "value": "Decan",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "decan_semnatura",
+      "value": null,
+      "field_type": "signature",
+      "confidence": "high"
+    },
+    {
+      "key": "director_departament_nume",
+      "value": "Conf. dr. Nicușor Minculete",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "director_departament_titlu_functie",
+      "value": "Director de departament",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "director_departament_semnatura",
+      "value": null,
+      "field_type": "signature",
+      "confidence": "high"
+    },
+    {
+      "key": "titular_curs_nume",
+      "value": "Lect. dr. Maria Dimitriu",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "titular_curs_titlu_functie",
+      "value": "Titular de curs",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "titular_curs_semnatura",
+      "value": null,
+      "field_type": "signature",
+      "confidence": "high"
+    },
+    {
+      "key": "titular_seminar_nume",
+      "value": "Lect. dr. Maria Dimitriu",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "titular_seminar_titlu_functie",
+      "value": "Titular de seminar",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "titular_seminar_semnatura",
+      "value": null,
+      "field_type": "signature",
+      "confidence": "high"
+    },
+    {
+      "key": "nota_1_domeniu_studii",
+      "value": "Domeniul de studii - se alege una din variantele: Licență/ Masterat/ Doctorat (se completează conform cu Nomenclatorul domeniilor și al specializărilor/ programelor de studii universitare în vigoare);",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "nota_2_ciclu_studii",
+      "value": "Ciclul de studii - se alege una din variantele: Licență/ Masterat/ Doctorat;",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "nota_3_regimul_disciplinei_continut",
+      "value": "Regimul disciplinei (conținut) - se alege una din variantele: DF (disciplină fundamentală)/ DD (disciplină din domeniu)/ DS (disciplină de specialitate)/ DC (disciplină complementară) – pentru nivelul de licență; DAP (disciplină de aprofundare)/ DSI (disciplină de sinteză)/ DCA (disciplină de cunoaștere avansată) – pentru nivelul de masterat;",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "nota_4_regimul_disciplinei_obligativitate",
+      "value": "Regimul disciplinei (obligativitate) - se alege una din variantele: DI (disciplină obligatorie)/ DO (disciplină opțională)/ DFac (disciplină facultativă);",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "nota_5_echivalenta_credit",
+      "value": "Un credit este echivalent cu 30 de ore de studiu (activități didactice și studiu individual).",
+      "field_type": "string",
+      "confidence": "high"
+    },
+    {
+      "key": "ore_per_credit",
+      "value": 30.0,
+      "field_type": "number",
+      "confidence": "high"
+    },
+    {
+      "key": "legende_regim_continut",
+      "value": [
+        "DF - disciplină fundamentală",
+        "DD - disciplină din domeniu",
+        "DS - disciplină de specialitate",
+        "DC - disciplină complementară",
+        "DAP - disciplină de aprofundare",
+        "DSI - disciplină de sinteză",
+        "DCA - disciplină de cunoaștere avansată"
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    },
+    {
+      "key": "legende_regim_obligativitate",
+      "value": [
+        "DI - disciplină obligatorie",
+        "DO - disciplină opțională",
+        "DFac - disciplină facultativă"
+      ],
+      "field_type": "list",
+      "confidence": "high"
+    }
+  ],
+  "tables": [
+    {
+      "name": "structura_ore_saptamanale",
+      "headers": [
+        "indicator",
+        "total",
+        "din_care_curs",
+        "din_care_seminar_laborator_proiect"
+      ],
+      "rows": [
+        [
+          "3.1 Număr de ore pe săptămână",
+          "5",
+          "3",
+          "2"
+        ],
+        [
+          "3.4 Total ore din planul de învățământ",
+          "70",
+          "42",
+          "28"
+        ]
+      ]
+    },
+    {
+      "name": "distributia_fondului_de_timp",
+      "headers": [
+        "activitate",
+        "ore"
+      ],
+      "rows": [
+        [
+          "Studiul după manual, suport de curs, bibliografie și notițe",
+          "25"
+        ],
+        [
+          "Documentare suplimentară în bibliotecă, pe platformele electronice de specialitate și pe teren",
+          "10"
+        ],
+        [
+          "Pregătire seminare/ laboratoare/ proiecte, teme, referate, portofolii și eseuri",
+          "40"
+        ],
+        [
+          "Tutoriat",
+          "2"
+        ],
+        [
+          "Examinări",
+          "3"
+        ],
+        [
+          "Alte activități",
+          "0"
+        ]
+      ]
+    },
+    {
+      "name": "totaluri_ore_student",
+      "headers": [
+        "indicator",
+        "valoare"
+      ],
+      "rows": [
+        [
+          "3.7 Total ore de activitate a studentului",
+          "80"
+        ],
+        [
+          "3.8 Total ore pe semestru",
+          "150"
+        ],
+        [
+          "3.9 Numărul de credite",
+          "6"
+        ]
+      ]
+    },
+    {
+      "name": "preconditii",
+      "headers": [
+        "tip_preconditie",
+        "descriere"
+      ],
+      "rows": [
+        [
+          "4.1 de curriculum",
+          "Elemente de analiză matematică din liceu."
+        ],
+        [
+          "4.2 de competențe",
+          "Calculul limitelor de șiruri și de funcții."
+        ],
+        [
+          "4.2 de competențe",
+          "Derivarea funcțiilor elementare."
+        ],
+        [
+          "4.2 de competențe",
+          "Integrarea funcțiilor elementare."
+        ],
+        [
+          "4.2 de competențe",
+          "Reprezentarea grafică a funcțiilor."
+        ]
+      ]
+    },
+    {
+      "name": "conditii_desfasurare",
+      "headers": [
+        "tip_conditie",
+        "descriere"
+      ],
+      "rows": [
+        [
+          "5.1 de desfășurare a cursului",
+          "Sală dotată cu minim 2 table și echipamente multimedia. Capacitatea sălii: 100 loc"
+        ]
+      ]
+    },
+    {
+      "name": "conditii_desfasurare_seminar",
+      "headers": [
+        "sectiune",
+        "conditii"
+      ],
+      "rows": [
+        [
+          "5.2 de desfășurare a seminarului/ laboratorului/ proiectului",
+          "Sală de seminar, cu tablă și minim 30 locuri"
+        ]
+      ]
+    },
+    {
+      "name": "competente_profesionale",
+      "headers": [
+        "categorie",
+        "cod_competenta",
+        "titlu_competenta",
+        "cod_rezultat",
+        "descriere_rezultat"
+      ],
+      "rows": [
+        [
+          "Competențe profesionale",
+          "CP 4",
+          "Utilizarea bazelor teoretice ale informaticii și a modelelor formale",
+          "R.Î.4.1.",
+          "Absolventul poate să verifice corespondența dintre capacitățile, corectitudinea și eficienta unui algoritm sau a unui sistem intențional și anumite specificații formale."
+        ],
+        [
+          "Competențe profesionale",
+          "CP 4",
+          "Utilizarea bazelor teoretice ale informaticii și a modelelor formale",
+          "R.Î.4.2.",
+          "Absolventul poate să utilizeze modele formale și teorii matematice pentru a rezolva probleme din diverse domenii ale informaticii."
+        ],
+        [
+          "Competențe profesionale",
+          "CP 4",
+          "Utilizarea bazelor teoretice ale informaticii și a modelelor formale",
+          "R.Î.4.3.",
+          "Absolventul poate să utilizeze concepte și tehnici matematice pentru a analiza și proiecta algoritmi și structuri de date folosind tehnologii specifice."
+        ],
+        [
+          "Competențe profesionale",
+          "CP 4",
+          "Utilizarea bazelor teoretice ale informaticii și a modelelor formale",
+          "R.Î.4.4.",
+          "Absolventul poate să utilizeze modele formale pentru a proiecta sisteme informatice sigure și fiabile."
+        ],
+        [
+          "Competențe profesionale",
+          "CP 4",
+          "Utilizarea bazelor teoretice ale informaticii și a modelelor formale",
+          "R.Î.4.5.",
+          "Absolventul poate să utilizeze modele formale pentru a verifica corectitudinea programelor."
+        ],
+        [
+          "Competențe profesionale",
+          "CP 4",
+          "Utilizarea bazelor teoretice ale informaticii și a modelelor formale",
+          "R.Î.4.6.",
+          "Studentul/absolventul construiește etic și responsabil soluții IT sigure și scalabile, colaborând cu specialiști din domenii conexe."
+        ],
+        [
+          "Competențe profesionale",
+          "CP 4",
+          "Utilizarea bazelor teoretice ale informaticii și a modelelor formale",
+          "R.Î.4.7.",
+          "Studentul/absolventul dezvoltă un mediu colaborativ și își asumă responsabilitatea pentru succesul livrării proiectelor la timp și conform cerințelor. Studentul/absolventul organizează echipe tehnice și gestionează ciclul de viață al proiectelor software."
+        ]
+      ]
+    },
+    {
+      "name": "obiectivele_disciplinei",
+      "headers": [
+        "subsectiune",
+        "continut"
+      ],
+      "rows": [
+        [
+          "7.1 Obiectivul general al disciplinei",
+          "Înțelegerea noțiunilor și rezultatelor fundamentale de analiză matematică și dezvoltarea abilităților de aplicare a acestora pentru rezolvarea unor probleme practice."
+        ],
+        [
+          "7.2 Obiectivele specifice",
+          "Studiul naturii seriilor numerice și a seriilor de funcții reale. | Determinarea mulțimii de convergență a unei serii de puteri. | Utilizarea dezvoltărilor Taylor. | Studiul continuității și diferențiabilității funcțiilor reale. | Determinarea punctelor de extrem local ale funcțiilor diferențiabile. | Studiul naturii integralelor improprii și calculul integralelor improprii convergente. | Calculul integralelor cu parametru | Calculul integralelor curbilinii. | Calculul integralelor duble."
+        ]
+      ]
+    },
+    {
+      "name": "competente_transversale",
+      "headers": [
+        "cod_competenta",
+        "titlu_competenta",
+        "rezultate_invatare"
+      ],
+      "rows": [
+        [
+          "CT1",
+          "Aplicarea regulilor de muncă organizată și eficientă, a unor atitudini responsabile față de domeniul didactic-științific, pentru valorificarea creativă a propriului potențial, cu respectarea principiilor și a normelor de etică profesională",
+          "R.Î.1.1. Absolventul este capabil să-și organizeze și gestioneze timpul și resursele pentru a atinge obiectivele de învățare. | R.Î.1.2. Absolventul este capabil să desfășoare activitate creatoare, să se dezvolte profesional și să abordeze noi domenii, adaptându-se cerințelor nou apărute. | R.Î.1.3. Absolventul are capacitatea de a acționa în mod responsabil și etic în activitățile didactice și de cercetare, demonstrând integritate și respect față de colegi, studenți și comunitatea academică. | R.Î.1.4. Absolventul are abilitatea de a-și organiza și prioritiza activitățile pentru a asigura o muncă eficientă și productivă, respectând termenele limită și obiectivele stabilite."
+        ],
+        [
+          "CT2",
+          "Desfășurarea eficientă a activităților organizate într-un grup inter-disciplinar și dezvoltarea capacităților empatice de comunicare inter-personală, de relaționare și colaborare cu grupuri diverse",
+          "R.Î.2.1. Absolventul va putea utiliza instrumente și tehnici de comunicare pentru a rezolva probleme și a dezvolta soluții inovatoare. | R.Î.2.2. Absolventul va relaționa și colabora cu grupuri diverse, inclusiv cu persoane din alte culturi sau medii socio-economice. | R.Î.2.3. Absolventul poate aplica tehnici de comunicare empatică, ascultând activ și răspunzând adecvat nevoilor și preocupărilor colegilor, contribuind astfel la crearea unui mediu de lucru armonios. | R.Î.2.4. Absolventul poate adapta stilul de comunicare în funcție de contextul cultural și diversitatea grupului, asigurându-se că mesajul este transmis eficient și este bine înțeles de toți participanții."
+        ],
+        [
+          "CT3",
+          "Utilizarea unor metode și tehnici eficiente de învățare, informare, cercetare și dezvoltare a capacităților de valorificare a cunoștințelor, de adaptare la cerințele unei societăți dinamice și de comunicare în limba română și într-o limbă de circulație internațională",
+          "R.Î.3.1. Absolventul va utiliza metode și tehnici eficiente de învățare pentru a-și îmbunătăți performanța academică. | R.Î.3.2. Absolventul va utiliza instrumente și tehnici eficiente pentru a informa și comunica informații complexe într-un mod clar și concis. | R.Î.3.3. Absolventul poate evalua critic sursele de informație, identificând cele mai relevante și credibile materiale pentru a sprijini deciziile informate și fundamentate."
+        ]
+      ]
+    },
+    {
+      "name": "continut_curs_8_1",
+      "headers": [
+        "tema_curs",
+        "metode_de_predare",
+        "numar_de_ore",
+        "observatii"
+      ],
+      "rows": [
+        [
+          "Introducere în analiza matematică. Repere bibliografice. Definiția axiomatică a mulțimii numerelor reale. Șiruri de numere reale: limită, convergență, subșir al unui șir de numere reale, operații cu șiruri, criterii de existență a limitei, criteriul de convergență al lui Cauchy.",
+          "Expunerea; Conversația; Problematizarea; Demonstrația; Exemplificarea",
+          "6",
+          "Săpt. 1 - 2"
+        ],
+        [
+          "Serii de numere reale: convergență, convergență absolută, criterii de comparație pentru serii cu termeni pozitivi, criterii directe pentru serii cu termeni pozitivi, criterii pentru serii cu termeni oarecare.",
+          "Expunerea; Conversația; Problematizarea; Demonstrația; Exemplificarea",
+          "3",
+          "Săpt. 3"
+        ],
+        [
+          "Funcții reale de o variabila reală: limite, continuitate, derivabilitate. Polinomul și formula lui Taylor. Primitive. Integrabilitatea Riemann.",
+          "Expunerea; Conversația; Problematizarea; Demonstrația; Exemplificarea",
+          "6",
+          "Săpt. 4 - 5"
+        ],
+        [
+          "Integrale improprii: definiție, exemple, criterii de convergență.",
+          "Expunerea; Conversația; Problematizarea; Demonstrația; Exemplificarea",
+          "3",
+          "Săpt. 6"
+        ],
+        [
+          "Șiruri și serii de funcții; convergență simplă și uniformă. Serii de puteri: raza de convergență; derivarea și integrarea. Dezvoltări în serie Taylor.",
+          "Expunerea; Conversația; Problematizarea; Demonstrația; Exemplificarea",
+          "6",
+          "Săpt. 7 - 8"
+        ],
+        [
+          "Spațiul Rⁿ. Limite de șiruri și funcții. Continuitate. Derivabilitatea parțială; matricea jacobiană. Diferențiabilitatea funcțiilor. Derivate parțiale de ordin superior; teorema lui Schwarz.",
+          "Expunerea; Conversația; Problematizarea; Demonstrația; Exemplificarea",
+          "6",
+          "Săpt. 9 - 10"
+        ],
+        [
+          "Diferențiala de ordin superior. Formula lui Taylor. Extremele funcțiilor diferențiabile. Funcții definite implicit. Extreme cu legături.",
+          "Expunerea; Conversația; Problematizarea; Demonstrația; Exemplificarea",
+          "3",
+          "Săpt. 11"
+        ],
+        [
+          "Lungimea unei curbe. Integrala curbilinie de speța I. Integrale curbilinii",
+          "Expunerea; Conversația; Problematizarea; Demonstrația",
+          "3",
+          "Săpt. 12"
+        ]
+      ]
+    },
+    {
+      "name": "curs_continuare_8_1",
+      "headers": [
+        "tema",
+        "metode_de_predare_invatare",
+        "numar_de_ore",
+        "observatii"
+      ],
+      "rows": [
+        [
+          "de spețа a doua; independența de drum.",
+          "Exemplificarea",
+          "",
+          ""
+        ],
+        [
+          "Integrale cu parametru. Integrale duble.",
+          "Expunerea\nConversația\nProblematizarea\nDemonstrația\nExemplificarea",
+          "6",
+          "Săpt. 13 - 14"
+        ]
+      ]
+    },
+    {
+      "name": "seminar_laborator_proiect_8_2",
+      "headers": [
+        "nr_crt",
+        "tema",
+        "metode_de_predare_invatare",
+        "numar_de_ore",
+        "observatii"
+      ],
+      "rows": [
+        [
+          "1",
+          "Recapitularea unor cunoștințe de analiză matematică de liceu.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "2",
+          "Săpt. 1"
+        ],
+        [
+          "2",
+          "Studiul convergenței șirurilor reale.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "2",
+          "Săpt. 2"
+        ],
+        [
+          "3",
+          "Serii numerice. Studiul convergenței seriilor reale.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "4",
+          "Săpt. 3-4"
+        ],
+        [
+          "4",
+          "Derivabilitatea funcțiilor reale de o variabilă reală. Aplicații ale teoremei Lagrange. Aplicarea formulei lui Taylor.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "2",
+          "Săpt. 5"
+        ],
+        [
+          "5",
+          "Studiul convergenței integralelor improprii; calculul unor integrale improprii. Utilizarea funcțiilor lui Euler.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "2",
+          "Săpt. 6"
+        ],
+        [
+          "6",
+          "Studiul convergenței șirurilor și seriilor de funcții.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "2",
+          "Săpt. 7"
+        ],
+        [
+          "7",
+          "Serii de puteri: calculul razei de convergență; calculul sumei unor serii de puteri prin derivare sau integrare. Dezvoltări în serie Taylor.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "2",
+          "Săpt. 8"
+        ]
+      ]
+    },
+    {
+      "name": "bibliografie",
+      "headers": [
+        "nr_crt",
+        "referinta_bibliografica"
+      ],
+      "rows": [
+        [
+          "1",
+          "R. Păltănea, E. Păltănea, Elemente de analiză matematică și teoria aproximării, Editura Universității Transilvania din Brașov, 2009."
+        ],
+        [
+          "2",
+          "Gh. Sirețchi, Calcul diferențial și integral, vol 1-2, Editura Științifică și Enciclopedică, 1985."
+        ],
+        [
+          "3",
+          "O. Stănășilă, Analiză matematică, Editura Didactică și Pedagogică, 1983 (reeditată în 1993)."
+        ],
+        [
+          "4",
+          "N. Cotfas, L. A. Cotfas, Elemente de analiză matematică, Editura Universității București, 2010"
+        ],
+        [
+          "5",
+          "W. F. Trench, Introduction to Real Analysis (2013). Books and Monographs. Book 7. http://digitalcommons.trinity.edu/mono/7"
+        ]
+      ]
+    },
+    {
+      "name": "tematica_seminar_saptamani_8_14",
+      "headers": [
+        "nr_crt",
+        "tema",
+        "metode_de_predare",
+        "nr_ore",
+        "saptamana"
+      ],
+      "rows": [
+        [
+          "8",
+          "Studiul continuității funcțiilor de două variabile. Calculul derivatelor parțiale; reprezentarea matricei jacobiene.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "2",
+          "Săpt. 9"
+        ],
+        [
+          "9",
+          "Calculul diferențialei. Derivarea parțială a funcțiilor compuse. Calculul derivatelor parțiale de ordin superior.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "2",
+          "Săpt. 10"
+        ],
+        [
+          "10",
+          "Determinarea extremelor funcțiilor diferențiabile și studiul extremelor cu legături.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "2",
+          "Săpt. 11"
+        ],
+        [
+          "11",
+          "Calculul integralelor curbilinii de prima speță și de spețea a doua; studiul independenței de drum.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "2",
+          "Săpt. 12"
+        ],
+        [
+          "12",
+          "Calculul integralelor cu parametru.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "2",
+          "Săpt. 13"
+        ],
+        [
+          "13",
+          "Calculul integralelor duble pe domenii simple. Utilizarea schimbărilor de variabilă.",
+          "Discuția\nProblematizarea\nSintetizarea informațiilor\nGeneralizarea",
+          "2",
+          "Săpt. 14"
+        ]
+      ]
+    },
+    {
+      "name": "evaluare",
+      "headers": [
+        "tip_de_activitate",
+        "10_1_criterii_de_evaluare",
+        "10_2_metode_de_evaluare",
+        "10_3_pondere_din_nota_finala"
+      ],
+      "rows": [
+        [
+          "10.4 Curs",
+          "Cunoașterea și aplicarea corectă a rezultatelor teoretice fundamentale.",
+          "Examen scris.",
+          "80%"
+        ],
+        [
+          "10.5 Seminar/ laborator/ proiect",
+          "Participarea activă la seminar. Studiul individual.",
+          "Apreciere pe parcursul semestrului.",
+          "20%"
+        ]
+      ]
+    },
+    {
+      "name": "bloc_semnaturi",
+      "headers": [
+        "rol",
+        "nume_titlu",
+        "functie",
+        "semnatura"
+      ],
+      "rows": [
+        [
+          "Decan",
+          "Conf. dr. Ion Gabriel Stan",
+          "Decan",
+          ""
+        ],
+        [
+          "Director de departament",
+          "Conf. dr. Nicușor Minculete",
+          "Director de departament",
+          ""
+        ],
+        [
+          "Titular de curs",
+          "Lect. dr. Maria Dimitriu",
+          "Titular de curs",
+          ""
+        ],
+        [
+          "Titular de seminar",
+          "Lect. dr. Maria Dimitriu",
+          "Titular de seminar",
+          ""
+        ]
+      ]
+    },
+    {
+      "name": "note_explicative",
+      "headers": [
+        "numar_nota",
+        "continut_nota"
+      ],
+      "rows": [
+        [
+          "1",
+          "Domeniul de studii - se alege una din variantele: Licență/ Masterat/ Doctorat (se completează conform cu Nomenclatorul domeniilor și al specializărilor/ programelor de studii universitare în vigoare);"
+        ],
+        [
+          "2",
+          "Ciclul de studii - se alege una din variantele: Licență/ Masterat/ Doctorat;"
+        ],
+        [
+          "3",
+          "Regimul disciplinei (conținut) - se alege una din variantele: DF (disciplină fundamentală)/ DD (disciplină din domeniu)/ DS (disciplină de specialitate)/ DC (disciplină complementară) – pentru nivelul de licență; DAP (disciplină de aprofundare)/ DSI (disciplină de sinteză)/ DCA (disciplină de cunoaștere avansată) – pentru nivelul de masterat;"
+        ],
+        [
+          "4",
+          "Regimul disciplinei (obligativitate) - se alege una din variantele: DI (disciplină obligatorie)/ DO (disciplină opțională)/ DFac (disciplină facultativă);"
+        ],
+        [
+          "5",
+          "Un credit este echivalent cu 30 de ore de studiu (activități didactice și studiu individual)."
+        ]
+      ]
+    }
+  ],
+  "source_route": "scanned_pdf"
+}

@@ -8,7 +8,7 @@ flagging) without needing to know the document type in advance.
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
-from typing import Literal
+from typing import Literal, Optional
 
 
 FieldType = Literal["string", "date", "number", "boolean", "list", "signature", "id"]
@@ -34,4 +34,5 @@ class ExtractedDocument(BaseModel):
     fields: list[ExtractedField] = Field(default_factory=list)
     tables: list[ExtractedTable] = Field(default_factory=list)
     source_route: str           # "text_pdf" | "scanned_pdf" | "image"
+    markdown_content: Optional[str] = None
 

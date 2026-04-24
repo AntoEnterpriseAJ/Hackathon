@@ -170,6 +170,57 @@ def extract_from_text(text: str) -> dict:
     return _call_claude(messages)
 
 
+def extract_from_images_paged(file_bytes: bytes) -> dict:
+    """
+    Extract from a scanned PDF by sending one page at a time to Claude,
+    then merge all results. Used automatically for PDFs > _PAGE_BATCH_THRESHOLD pages.
+    """
+    from services import scan_extractor  # local import to avoid circular
+    from schemas.extraction import ExtractedDocument
+    from routers.documents import _normalize_extracted_payload
+
+    num_pages = scan_extractor.count_pdf_pages(file_bytes)
+    all_fields: list = []
+    all_tables: list = []
+    document_type: str | None = None
+    summary_parts: list[str] = []
+    seen_field_keys: set[str] = set()
+    seen_table_names: set[str] = set()
+
+    for i in range(min(num_pages, scan_extractor._MAX_PAGES)):
+        b64 = scan_extractor.extract_single_page_image(file_bytes, i)
+        raw = extract_from_images([b64])
+        raw = _normalize_extracted_payload(raw)
+        page_doc = ExtractedDocument(**raw, source_route="scanned_pdf")
+
+        if document_type is None and page_doc.document_type not in (None, "", "form"):
+            document_type = page_doc.document_type
+        if page_doc.summary:
+            summary_parts.append(page_doc.summary)
+
+        for f in page_doc.fields:
+            if f.key not in seen_field_keys:
+                seen_field_keys.add(f.key)
+                all_fields.append(f.model_dump())
+
+        for t in page_doc.tables:
+            tname = t.name
+            base_name = tname
+            suffix = 2
+            while tname in seen_table_names:
+                tname = f"{base_name}_p{i + 1}_{suffix}"
+                suffix += 1
+            seen_table_names.add(tname)
+            all_tables.append({**t.model_dump(), "name": tname})
+
+    return {
+        "document_type": document_type or "form",
+        "summary": " ".join(dict.fromkeys(summary_parts)),  # deduplicate order-preserving
+        "fields": all_fields,
+        "tables": all_tables,
+    }
+
+
 def extract_from_images(page_images: list[str]) -> dict:
     """Extract structured data from base64-encoded PNG page images."""
     content: list[dict] = [
@@ -193,6 +244,92 @@ def extract_from_images(page_images: list[str]) -> dict:
         }
     )
     return _call_claude([{"role": "user", "content": content}])
+
+
+# ---------------------------------------------------------------------------
+# Markdown generation
+# ---------------------------------------------------------------------------
+
+_MARKDOWN_SYSTEM_PROMPT = (
+    "You are an expert document parser specialized in converting Romanian academic and administrative "
+    "PDFs into clean, well-structured Markdown documents. "
+    "Preserve the original structure as much as possible: titles, section headings, subheadings, tables, "
+    "footnotes, notes, year and semester organization, discipline and course names, credits, hours, "
+    "exam or evaluation type, abbreviations, and legends. "
+    "Convert all tables into valid Markdown tables with aligned columns. "
+    "Do not merge unrelated columns and do not drop empty columns that carry meaning. "
+    "If a table is too complex for clean Markdown, represent it using structured bullet sections instead. "
+    "Do not summarize — output a faithful conversion that keeps all information from the document. "
+    "Preserve Romanian text exactly as written, including all diacritics. "
+    "Do not translate headings, course names, faculty names, department names, or institutional labels."
+)
+
+
+def generate_markdown_from_text(text: str) -> str:
+    """Convert plain-text document content to a faithful Markdown representation."""
+    response = _get_client().messages.create(
+        model=_MODEL,
+        max_tokens=_MAX_TOKENS,
+        system=_MARKDOWN_SYSTEM_PROMPT,
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    "Convert the following document into a clean, well-structured Markdown document. "
+                    "Preserve all content, structure, tables, and Romanian text exactly.\n\n"
+                    f"{text}"
+                ),
+            }
+        ],
+    )
+    return response.content[0].text  # type: ignore[union-attr]
+
+
+def generate_markdown_from_images(page_images: list[str]) -> str:
+    """Convert page images (base64-encoded PNGs) to a faithful Markdown representation."""
+    content: list[dict] = [
+        {
+            "type": "image",
+            "source": {
+                "type": "base64",
+                "media_type": "image/png",
+                "data": b64,
+            },
+        }
+        for b64 in page_images
+    ]
+    content.append(
+        {
+            "type": "text",
+            "text": (
+                "Convert this Romanian academic or administrative document into a clean, well-structured "
+                "Markdown document. Preserve all content, structure, tables as Markdown tables, "
+                "Romanian text, and diacritics exactly."
+            ),
+        }
+    )
+    response = _get_client().messages.create(
+        model=_MODEL,
+        max_tokens=_MAX_TOKENS,
+        system=_MARKDOWN_SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": content}],
+    )
+    return response.content[0].text  # type: ignore[union-attr]
+
+
+def generate_markdown_from_images_paged(file_bytes: bytes) -> str:
+    """
+    Convert a multi-page scanned PDF to Markdown by collecting all page images
+    (up to _MAX_PAGES) and sending them in a single Claude call.
+    """
+    from services import scan_extractor as _scan  # local import to avoid circular
+
+    num_pages = _scan.count_pdf_pages(file_bytes)
+    page_images = [
+        _scan.extract_single_page_image(file_bytes, i)
+        for i in range(min(num_pages, _scan._MAX_PAGES))
+    ]
+    return generate_markdown_from_images(page_images)
 
 
 # ---------------------------------------------------------------------------

@@ -10,9 +10,26 @@ import pymupdf
 
 _MAX_PAGES = 20
 _RENDER_DPI = 150
+_PAGE_BATCH_THRESHOLD = 1  # send page-by-page when scanned PDF exceeds this
 
 # PyMuPDF filetype hints for common image extensions
 _EXT_REMAP: dict[str, str] = {"jpg": "jpeg", "tif": "tiff"}
+
+
+def count_pdf_pages(file_bytes: bytes) -> int:
+    doc = pymupdf.open(stream=file_bytes, filetype="pdf")
+    n = doc.page_count
+    doc.close()
+    return n
+
+
+def extract_single_page_image(file_bytes: bytes, page_index: int) -> str:
+    """Render a single PDF page to a base64-encoded PNG string."""
+    doc = pymupdf.open(stream=file_bytes, filetype="pdf")
+    pix = doc[page_index].get_pixmap(dpi=_RENDER_DPI)
+    png_bytes = pix.tobytes("png")
+    doc.close()
+    return base64.standard_b64encode(png_bytes).decode("utf-8")
 
 
 def extract_page_images(file_bytes: bytes, filename: str, *, is_pdf: bool) -> list[str]:
