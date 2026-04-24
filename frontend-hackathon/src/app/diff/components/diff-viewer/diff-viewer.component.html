@@ -1,7 +1,17 @@
 <!-- Single continuous document view — changes highlighted inline -->
 <div class="doc-viewer" *ngIf="sectionDiffs().length > 0; else emptyState">
 
-  <ng-container *ngFor="let section of sectionDiffs(); trackBy: trackBySection">
+  <div class="viewer-controls">
+    <button type="button" class="control-btn" [class.active]="showEqualSections" (click)="toggleEqualSections()">
+      {{ showEqualSections ? 'Hide unchanged sections' : 'Show unchanged sections' }}
+    </button>
+
+    <button type="button" class="control-btn" [class.active]="showEqualLines" (click)="toggleEqualLines()">
+      {{ showEqualLines ? 'Hide unchanged lines' : 'Show unchanged lines' }}
+    </button>
+  </div>
+
+  <ng-container *ngFor="let section of getVisibleSections(); trackBy: trackBySection">
 
     <!-- Section heading (always shown as part of the document flow) -->
     <div class="section-heading" [attr.data-status]="section.status">
@@ -9,10 +19,13 @@
       <span class="section-pill" *ngIf="section.status !== 'equal'" [ngClass]="'pill-' + section.status">
         {{ section.status }}
       </span>
+      <span class="section-pill pill-hidden" *ngIf="getHiddenEqualCount(section) > 0">
+        {{ getHiddenEqualCount(section) }} unchanged hidden
+      </span>
     </div>
 
     <!-- Lines flow as paragraphs, not table rows -->
-    <ng-container *ngFor="let line of section.lines; trackBy: trackByLine">
+    <ng-container *ngFor="let line of getVisibleLines(section); trackBy: trackByLine">
 
       <!-- Equal: plain text -->
       <p *ngIf="line.type === 'equal'" class="doc-line line-equal">
@@ -33,8 +46,8 @@
       <p *ngIf="line.type === 'replace'" class="doc-line line-replace">
         <ng-container *ngIf="line.inline_diff && line.inline_diff.length > 0; else plainReplace">
           <ng-container *ngFor="let token of line.inline_diff">
-            <span *ngIf="token.type === 'equal'"  class="tok-equal">{{ token.text }}</span>
-            <span *ngIf="token.type === 'add'"    class="tok-add">{{ token.text }}</span>
+            <span *ngIf="token.type === 'equal'" class="tok-equal">{{ token.text }}</span>
+            <span *ngIf="token.type === 'add'" class="tok-add">{{ token.text }}</span>
             <span *ngIf="token.type === 'remove'" class="tok-remove">{{ token.text }}</span>
           </ng-container>
         </ng-container>
@@ -42,6 +55,10 @@
       </p>
 
     </ng-container>
+
+    <p class="omitted-note" *ngIf="getVisibleLines(section).length === 0 && getHiddenEqualCount(section) > 0">
+      No changed lines in this section.
+    </p>
 
   </ng-container>
 

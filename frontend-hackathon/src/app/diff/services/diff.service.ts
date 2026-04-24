@@ -5,7 +5,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import { DiffResponse } from '../models/diff.models';
 
 @Injectable({
@@ -13,8 +13,9 @@ import { DiffResponse } from '../models/diff.models';
 })
 export class DiffService {
   private apiUrl = 'http://localhost:5000/api/diff';
+  private compareTimeoutMs = 120000;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Compare two PDF documents.
@@ -32,7 +33,9 @@ export class DiffService {
     formData.append('file_new', fileNew);
     formData.append('parser_type', parserType);
 
-    return this.http.post<DiffResponse>(`${this.apiUrl}/`, formData);
+    return this.http
+      .post<DiffResponse>(`${this.apiUrl}/`, formData)
+      .pipe(timeout(this.compareTimeoutMs));
   }
 
   /**

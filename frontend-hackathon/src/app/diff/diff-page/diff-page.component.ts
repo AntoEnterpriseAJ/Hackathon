@@ -8,6 +8,7 @@ import { DiffService } from '../services/diff.service';
 import { DiffUploadComponent } from '../components/diff-upload/diff-upload.component';
 import { DiffViewerComponent } from '../components/diff-viewer/diff-viewer.component';
 import { SectionDiff, DiffSummary } from '../models/diff.models';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-diff-page',
@@ -28,7 +29,7 @@ export class DiffPageComponent implements OnInit {
   errorMessage = signal<string | null>(null);
   serviceOnline = signal<boolean | null>(null);
 
-  constructor(private diffService: DiffService) {}
+  constructor(private diffService: DiffService) { }
 
   ngOnInit(): void {
     this.diffService.health().subscribe({
@@ -54,10 +55,30 @@ export class DiffPageComponent implements OnInit {
       },
       error: (err) => {
         console.error('Diff error:', err);
-        this.errorMessage.set('Failed to generate diff. Make sure the diff service is running.');
+        this.errorMessage.set(this.buildDiffErrorMessage(err));
         this.visualState.set('error');
       }
     });
+  }
+
+  private buildDiffErrorMessage(err: unknown): string {
+    const fallback = 'Failed to generate diff.';
+
+    if (err instanceof HttpErrorResponse) {
+      const backendMessage =
+        (typeof err.error === 'string' ? err.error : err.error?.error) ||
+        err.message;
+
+      if (backendMessage) {
+        return backendMessage;
+      }
+
+      if (err.status === 0) {
+        return 'Failed to reach diff service. Make sure backend is running on port 5000.';
+      }
+    }
+
+    return fallback;
   }
 
   resetResults() {

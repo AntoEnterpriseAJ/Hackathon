@@ -1,17 +1,17 @@
 // ── Continuous document viewer with inline diff highlights ────────────────────
 
-$page-bg:      #ffffff;
-$page-text:    #1f2333;
-$page-muted:   #6e7781;
-$page-border:  #d0d7de;
+$page-bg: #ffffff;
+$page-text: #1f2333;
+$page-muted: #6e7781;
+$page-border: #d0d7de;
 
-$add-bg:       #dafbe1;
-$add-color:    #116329;
-$add-word-bg:  #aceebb;
+$add-bg: #dafbe1;
+$add-color: #116329;
+$add-word-bg: #aceebb;
 
-$rem-bg:       #ffebe9;
-$rem-color:    #82071e;
-$rem-word-bg:  #ff818266;
+$rem-bg: #ffebe9;
+$rem-color: #82071e;
+$rem-word-bg: #ff818266;
 
 $heading-border: #d0d7de;
 
@@ -35,6 +35,36 @@ $heading-border: #d0d7de;
   }
 }
 
+.viewer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px dashed $page-border;
+}
+
+.control-btn {
+  border: 1px solid #c6cdd4;
+  background: #f6f8fa;
+  color: #36414b;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font: 700 0.75rem/1 'Space Grotesk', sans-serif;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+
+  &:hover {
+    background: #edf2f7;
+  }
+
+  &.active {
+    background: #1f2937;
+    border-color: #1f2937;
+    color: #f8fafc;
+  }
+}
+
 // ── Section headings (part of the document flow) ──────────────────────────────
 
 .section-heading {
@@ -45,11 +75,21 @@ $heading-border: #d0d7de;
   padding-bottom: 0.3rem;
   border-bottom: 1px solid $heading-border;
 
-  &:first-child { margin-top: 0; }
+  &:first-child {
+    margin-top: 0;
+  }
 
-  &[data-status='added']    { border-bottom-color: #2da44e; }
-  &[data-status='removed']  { border-bottom-color: #cf222e; }
-  &[data-status='modified'] { border-bottom-color: #9a6700; }
+  &[data-status='added'] {
+    border-bottom-color: #2da44e;
+  }
+
+  &[data-status='removed'] {
+    border-bottom-color: #cf222e;
+  }
+
+  &[data-status='modified'] {
+    border-bottom-color: #9a6700;
+  }
 }
 
 .section-heading-text {
@@ -69,9 +109,25 @@ $heading-border: #d0d7de;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 
-  &.pill-added    { background: $add-bg;     color: $add-color; }
-  &.pill-removed  { background: $rem-bg;     color: $rem-color; }
-  &.pill-modified { background: #fff8c5;     color: #7d4e00; }
+  &.pill-added {
+    background: $add-bg;
+    color: $add-color;
+  }
+
+  &.pill-removed {
+    background: $rem-bg;
+    color: $rem-color;
+  }
+
+  &.pill-modified {
+    background: #fff8c5;
+    color: #7d4e00;
+  }
+
+  &.pill-hidden {
+    background: #eef2f7;
+    color: #5d6874;
+  }
 }
 
 // ── Document lines (rendered as <p> tags) ─────────────────────────────────────
@@ -139,4 +195,10 @@ $heading-border: #d0d7de;
   padding: 3rem 1rem;
   color: $page-muted;
   font-family: 'Space Grotesk', sans-serif;
+}
+
+.omitted-note {
+  margin: 0.25rem 0 0.8rem;
+  color: $page-muted;
+  font: 600 0.8rem/1.3 'Space Grotesk', sans-serif;
 }
