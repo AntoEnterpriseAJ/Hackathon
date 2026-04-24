@@ -1,0 +1,60 @@
+<div class="diff-container">
+  <div *ngFor="let section of sectionDiffs(); trackBy: trackBySection" class="section-block">
+    <div class="section-header" [ngClass]="'status-' + section.status">
+      <span class="status-badge">{{ getStatusBadge(section.status) }}</span>
+      <h3>{{ section.name }}</h3>
+      <span class="status-label">{{ section.status }}</span>
+    </div>
+
+    <table class="diff-table">
+      <tbody>
+        <tr
+          *ngFor="let line of section.lines; trackBy: trackByLine"
+          [ngClass]="getLineBgClass(line.type)"
+        >
+          <!-- Old line number -->
+          <td class="line-number old-line-no">
+            {{ line.old_line_no }}
+          </td>
+
+          <!-- New line number -->
+          <td class="line-number new-line-no">
+            {{ line.new_line_no }}
+          </td>
+
+          <!-- Line content with inline diff -->
+          <td class="line-content">
+            <!-- Simple line (equal, add, remove) -->
+            <ng-container *ngIf="line.type !== 'replace'">
+              <span class="prefix" [ngClass]="'prefix-' + line.type">
+                {{ line.type === 'remove' ? '−' : line.type === 'add' ? '+' : ' ' }}
+              </span>
+              <span>{{ line.old_text || line.new_text || '' }}</span>
+            </ng-container>
+
+            <!-- Replace line with inline diff -->
+            <ng-container *ngIf="line.type === 'replace'">
+              <span class="prefix prefix-replace">~</span>
+              <ng-container *ngIf="line.inline_diff && line.inline_diff.length > 0">
+                <span
+                  *ngFor="let inlineDiff of line.inline_diff"
+                  [ngClass]="'inline-' + inlineDiff.type"
+                >
+                  {{ inlineDiff.text }}
+                </span>
+              </ng-container>
+              <ng-container *ngIf="!line.inline_diff || line.inline_diff.length === 0">
+                {{ line.new_text || '' }}
+              </ng-container>
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="sectionDiffs().length === 0" class="empty-state">
+    <p>No diffs available. Upload and compare documents to see results.</p>
+  </div>
+</div>

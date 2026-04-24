@@ -1,0 +1,49 @@
+<div class="upload-container">
+  <div class="upload-section">
+    <div class="upload-box">
+      <h3>Upload Old Document</h3>
+      <input
+        type="file"
+        accept=".pdf"
+        (change)="onFileOldSelected($event)"
+        #fileInputOld
+      />
+      <button
+        class="upload-btn"
+        (click)="fileInputOld.click()"
+      >
+        Choose File
+      </button>
+      <p class="file-name" *ngIf="fileOld">
+        {{ fileOld.name }}
+      </p>
+    </div>
+
+    <div class="upload-box">
+      <h3>Upload New Document</h3>
+      <input
+        type="file"
+        accept=".pdf"
+        (change)="onFileNewSelected($event)"
+        #fileInputNew
+      />
+      <button
+        class="upload-btn"
+        (click)="fileInputNew.click()"
+      >
+        Choose File
+      </button>
+      <p class="file-name" *ngIf="fileNew">
+        {{ fileNew.name }}
+      </p>
+    </div>
+  </div>
+
+  <button
+    class="compare-btn"
+    [disabled]="!isReady()"
+    (click)="onCompare()"
+  >
+    🔍 Compare Documents
+  </button>
+</div>

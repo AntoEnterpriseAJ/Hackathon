@@ -1,0 +1,35 @@
+<div *ngIf="summary()" class="summary-container">
+  <h2>Diff Summary</h2>
+
+  <div class="stats-grid">
+    <div class="stat-card total">
+      <span class="label">Total Sections</span>
+      <span class="value">{{ summary()!.total_sections }}</span>
+    </div>
+
+    <div class="stat-card modified">
+      <span class="label">Modified</span>
+      <span class="value">{{ summary()!.modified }}</span>
+    </div>
+
+    <div class="stat-card added">
+      <span class="label">Added</span>
+      <span class="value">{{ summary()!.added }}</span>
+    </div>
+
+    <div class="stat-card removed">
+      <span class="label">Removed</span>
+      <span class="value">{{ summary()!.removed }}</span>
+    </div>
+
+    <div class="stat-card unchanged">
+      <span class="label">Unchanged</span>
+      <span class="value">{{ summary()!.unchanged }}</span>
+    </div>
+
+    <div class="stat-card logic">
+      <span class="label">Logic Changes</span>
+      <span class="value">{{ summary()!.logic_changes_count }}</span>
+    </div>
+  </div>
+</div>

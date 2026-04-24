@@ -1,0 +1,31 @@
+<div class="logic-container">
+  <h2>Logical Changes</h2>
+
+  <div *ngIf="logicChanges().length === 0" class="empty-state">
+    <p>No logical changes detected.</p>
+  </div>
+
+  <div *ngFor="let change of logicChanges(); trackBy: trackByChange" 
+       [ngClass]="'logic-item ' + getSeverityClass(change.severity)">
+    <div class="change-header">
+      <span class="icon">{{ getSeverityIcon(change.severity) }}</span>
+      <div class="change-info">
+        <span class="type">{{ change.type }}</span>
+        <span class="section">{{ change.section }}</span>
+      </div>
+      <span class="severity">{{ change.severity }}</span>
+    </div>
+
+    <div class="change-body">
+      <p class="description">{{ change.description }}</p>
+      <div class="values" *ngIf="change.old_value || change.new_value">
+        <span class="old-value" *ngIf="change.old_value">
+          <strong>Was:</strong> {{ change.old_value }}
+        </span>
+        <span class="new-value" *ngIf="change.new_value">
+          <strong>Now:</strong> {{ change.new_value }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

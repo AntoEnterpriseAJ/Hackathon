@@ -1,0 +1,48 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>📄 Diff Analyzer</h1>
+    <p>Compare two PDF documents and see changes at a glance</p>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="errorMessage()" class="error-box">
+    <strong>Error:</strong> {{ errorMessage() }}
+    <button (click)="resetResults()">Dismiss</button>
+  </div>
+
+  <!-- Upload section -->
+  <app-diff-upload
+    (filesSelected)="onFilesSelected($event)"
+  ></app-diff-upload>
+
+  <!-- Loading state -->
+  <div *ngIf="uploadState() === 'loading'" class="loading-box">
+    <div class="spinner"></div>
+    <p>Comparing documents...</p>
+  </div>
+
+  <!-- Results -->
+  <div *ngIf="uploadState() === 'done' && diffResult()" class="results-section">
+    <button class="reset-btn" (click)="resetResults()">← Start Over</button>
+
+    <!-- Summary -->
+    <app-diff-summary
+      [summary]="diffResult()!.summary"
+    ></app-diff-summary>
+
+    <!-- Logic changes (if any) -->
+    <div *ngIf="diffResult()!.logic_changes.length > 0">
+      <app-logic-changes
+        [logicChanges]="diffResult()!.logic_changes"
+      ></app-logic-changes>
+    </div>
+
+    <!-- Detailed diffs -->
+    <div class="viewer-section">
+      <h2>Detailed Changes</h2>
+      <app-diff-viewer
+        [sectionDiffs]="diffResult()!.sections"
+      ></app-diff-viewer>
+    </div>
+  </div>
+</div>

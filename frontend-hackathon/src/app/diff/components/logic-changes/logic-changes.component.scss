@@ -1,0 +1,130 @@
+.logic-container {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    color: #1f2333;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #999;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.logic-item {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #ccc;
+  background: #f9f9f9;
+
+  &.severity-high {
+    border-left-color: #dc3545;
+    background: #fff5f6;
+  }
+
+  &.severity-medium {
+    border-left-color: #ffc107;
+    background: #fffbf0;
+  }
+
+  &.severity-low {
+    border-left-color: #28a745;
+    background: #f0fdf4;
+  }
+}
+
+.change-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+
+  .icon {
+    font-size: 1.5rem;
+  }
+
+  .change-info {
+    flex: 1;
+
+    .type {
+      display: block;
+      font-weight: bold;
+      font-family: 'Fraunces', serif;
+      color: #1f2333;
+    }
+
+    .section {
+      display: block;
+      font-size: 0.85rem;
+      color: #999;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+  }
+
+  .severity {
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+.change-body {
+  margin-left: 2.5rem;
+
+  .description {
+    margin: 0 0 0.5rem 0;
+    color: #555;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.95rem;
+  }
+
+  .values {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    font-family: 'Space Grotesk', monospace;
+
+    .old-value {
+      color: #dc3545;
+    }
+
+    .new-value {
+      color: #28a745;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .logic-item {
+    padding: 0.75rem;
+  }
+
+  .change-header {
+    flex-wrap: wrap;
+
+    .icon {
+      font-size: 1.25rem;
+    }
+
+    .change-info {
+      order: 2;
+      flex-basis: 100%;
+    }
+
+    .severity {
+      order: 3;
+    }
+  }
+}

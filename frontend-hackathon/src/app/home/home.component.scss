@@ -1,16 +1,106 @@
 :host {
+    --ink: #1f2333;
+    --ink-soft: #4a5168;
+    --panel: rgba(255, 252, 246, 0.9);
+    --panel-edge: rgba(255, 255, 255, 0.8);
+    --accent: #0f7c78;
+    --accent-strong: #0a595f;
+    --system: #9a4a2f;
+    --surface: #f7f1e2;
     display: block;
     min-height: 100vh;
+    color: var(--ink);
 }
 
-app-nav {
-    display: block;
+.app-shell {
+    min-height: 100vh;
+    padding: 2rem clamp(1rem, 2vw, 2rem) 2.25rem;
+    background:
+        radial-gradient(circle at 10% 10%, rgba(255, 182, 126, 0.35), transparent 35%),
+        radial-gradient(circle at 90% 20%, rgba(18, 145, 137, 0.24), transparent 32%),
+        linear-gradient(140deg, #f4e5bd 0%, #e8f1eb 60%, #dbe8ee 100%);
 }
 
-router-outlet ~ * {
-    display: block;
+.hero {
+    max-width: 980px;
+    margin: 0 auto 1.4rem;
+    animation: rise-in 320ms ease-out;
+
+    .kicker {
+        margin: 0;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.8rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent-strong);
+    }
+
+    h1 {
+        margin: 0.42rem 0 0;
+        font: 700 clamp(1.75rem, 3vw, 2.5rem) / 1.05 'Fraunces', serif;
+        letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+        max-width: 70ch;
+        margin: 0.7rem 0 0;
+        color: var(--ink-soft);
+        font: 500 0.96rem/1.45 'Space Grotesk', sans-serif;
+    }
 }
 
+.workspace-grid {
+    max-width: 980px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 1rem;
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-edge);
+    border-radius: 22px;
+    padding: 1rem;
+    backdrop-filter: blur(2px);
+    box-shadow: 0 10px 35px rgba(24, 34, 41, 0.12);
+    animation: rise-in 420ms ease-out both;
+}
+
+.panel-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: baseline;
+    margin-bottom: 0.85rem;
+
+    h2 {
+        margin: 0;
+        font: 700 1.12rem/1.2 'Fraunces', serif;
+    }
+
+    p {
+        margin: 0;
+        color: var(--ink-soft);
+        font: 500 0.8rem/1.2 'Space Grotesk', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+}
+
+.dropzone {
+    border: 2px dashed rgba(15, 124, 120, 0.45);
+    border-radius: 16px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.62);
+    transition: border-color 140ms ease, transform 140ms ease;
+
+    &.dragging {
+        border-color: var(--accent-strong);
+        transform: translateY(-2px);
+    }
+
+    p {
         margin: 0;
     }
 

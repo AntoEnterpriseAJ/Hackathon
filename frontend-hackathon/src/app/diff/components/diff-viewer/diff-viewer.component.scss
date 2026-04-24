@@ -1,0 +1,166 @@
+.diff-container {
+  margin: 2rem 0;
+}
+
+.section-block {
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: white;
+  font-family: 'Fraunces', serif;
+
+  &.status-equal {
+    background: #e8e8e8;
+    color: #1f2333;
+  }
+
+  &.status-modified {
+    background: #fff3cd;
+    color: #1f2333;
+  }
+
+  &.status-added {
+    background: #d4edda;
+    color: #1f2333;
+  }
+
+  &.status-removed {
+    background: #f8d7da;
+    color: #1f2333;
+  }
+
+  .status-badge {
+    font-weight: bold;
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    flex: 1;
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .status-label {
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+}
+
+.diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.9rem;
+
+  tbody tr {
+    &.line-equal {
+      background: #fafafa;
+    }
+
+    &.line-add {
+      background: #e6ffed;
+    }
+
+    &.line-remove {
+      background: #ffeef0;
+    }
+
+    &.line-replace {
+      background: #fff8f0;
+    }
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+  }
+
+  td {
+    padding: 0.5rem;
+    border-right: 1px solid #ddd;
+    vertical-align: top;
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+}
+
+.line-number {
+  width: 4rem;
+  text-align: right;
+  color: #999;
+  background: #fafafa;
+  user-select: none;
+  font-size: 0.85rem;
+
+  &.old-line-no {
+    border-right: 1px solid #ddd;
+  }
+}
+
+.line-content {
+  word-break: break-word;
+  white-space: pre-wrap;
+  overflow-x: auto;
+
+  .prefix {
+    font-weight: bold;
+    margin-right: 0.25rem;
+    display: inline-block;
+    width: 1rem;
+    text-align: center;
+
+    &.prefix-add {
+      color: #28a745;
+    }
+
+    &.prefix-remove {
+      color: #dc3545;
+    }
+
+    &.prefix-replace {
+      color: #ffc107;
+    }
+  }
+
+  .inline-equal {
+    // No special styling
+  }
+
+  .inline-add {
+    background: #acf2bd;
+    font-weight: bold;
+  }
+
+  .inline-remove {
+    background: #fdb8c0;
+    font-weight: bold;
+    text-decoration: line-through;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #999;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+@media (max-width: 768px) {
+  .line-number {
+    font-size: 0.75rem;
+    padding: 0.25rem;
+  }
+
+  .line-content {
+    font-size: 0.8rem;
+  }
+}

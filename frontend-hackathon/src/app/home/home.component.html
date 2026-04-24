@@ -1,0 +1,88 @@
+<div class="app-shell">
+  <header class="hero">
+    <p class="kicker">Teacher Workflow Studio</p>
+    <h1>Document Chat for Classroom Paperwork</h1>
+    <p class="subtitle">
+      Upload PDFs or scanned forms, then ask the assistant to summarize, extract key fields,
+      and generate school-ready paperwork in minutes.
+    </p>
+  </header>
+
+  <main class="workspace-grid">
+    <section class="panel upload-panel">
+      <div class="panel-head">
+        <h2>Document Intake</h2>
+        <p>OCR-ready for scans</p>
+      </div>
+
+      <div class="dropzone" [class.dragging]="isDragging" (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+        <p class="dropzone-title">Drop files to process</p>
+        <p class="dropzone-note">PDF, JPG, PNG, TIFF up to 20MB each</p>
+
+        <label class="upload-btn" for="teacher-upload">Choose files</label>
+        <input id="teacher-upload" type="file" [accept]="acceptedTypes" multiple (change)="onFileSelection($event)" />
+
+        <ul class="hint-list">
+          @for (hint of formatHints; track hint) {
+          <li>{{ hint }}</li>
+          }
+        </ul>
+      </div>
+
+      <div class="documents">
+        <div class="documents-header">
+          <h3>Uploaded Documents</h3>
+          <span>{{ documents.length }} total</span>
+        </div>
+
+        @if (!documents.length) {
+        <p class="empty-state">No files yet. Upload a PDF or scanned page to begin.</p>
+        } @else {
+        <ul>
+          @for (doc of documents; track doc.id) {
+          <li>
+            <div>
+              <p class="doc-name">{{ doc.name }}</p>
+              <p class="doc-meta">{{ doc.typeLabel }} • {{ doc.sizeLabel }}</p>
+            </div>
+            <span>{{ formatTime(doc.uploadedAt) }}</span>
+          </li>
+          }
+        </ul>
+        }
+      </div>
+    </section>
+
+    <section class="panel chat-panel">
+      <div class="panel-head">
+        <h2>AI Paperwork Assistant</h2>
+        <p>Teacher-focused responses</p>
+      </div>
+
+      <div class="messages">
+        @for (message of messages; track message.id) {
+        <article class="message" [class.teacher]="message.role === 'teacher'"
+          [class.system]="message.role === 'system'">
+          <p class="role">{{ message.role === 'teacher' ? 'You' : message.role === 'system' ? 'System' : 'Assistant' }}
+          </p>
+          <p class="content">{{ message.content }}</p>
+          <time>{{ formatTime(message.timestamp) }}</time>
+        </article>
+        }
+      </div>
+
+      <div class="quick-actions">
+        @for (action of quickActions; track action) {
+        <button type="button" (click)="useQuickAction(action)">{{ action }}</button>
+        }
+      </div>
+
+      <div class="composer">
+        <textarea [value]="prompt" (input)="handlePromptChange($event)" (keydown)="handlePromptKeydown($event)"
+          placeholder="Ask for summaries, parent letters, form drafts, checklists..."></textarea>
+        <button type="button" (click)="sendMessage()">Send</button>
+      </div>
+    </section>
+  </main>
+</div>
