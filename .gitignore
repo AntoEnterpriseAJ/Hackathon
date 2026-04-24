@@ -1,0 +1,19 @@
+# Backend: Python virtual environment and caches
+diff-service/.venv/
+diff-service/__pycache__/
+diff-service/**/__pycache__/
+diff-service/**/*.py[cod]
+diff-service/.pytest_cache/
+diff-service/.mypy_cache/
+diff-service/.ruff_cache/
+
+# Backend: local env/config and logs
+diff-service/.env
+diff-service/.env.*
+diff-service/*.log
+diff-service/coverage/
+diff-service/htmlcov/
+
+# Backend: OS/editor noise
+diff-service/.DS_Store
+diff-service/Thumbs.db

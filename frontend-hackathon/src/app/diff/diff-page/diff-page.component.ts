@@ -2,7 +2,7 @@
  * DiffPageComponent - main page that orchestrates all diff components.
  */
 
-import { Component, signal, effect } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DiffService } from '../services/diff.service';
 import { DiffResponse } from '../models/diff.models';
@@ -24,18 +24,22 @@ import { LogicChangesComponent } from '../components/logic-changes/logic-changes
   templateUrl: './diff-page.component.html',
   styleUrls: ['./diff-page.component.scss']
 })
-export class DiffPageComponent {
+export class DiffPageComponent implements OnInit {
   // Signals
   uploadState = signal<'idle' | 'loading' | 'done' | 'error'>('idle');
   diffResult = signal<DiffResponse | null>(null);
   errorMessage = signal<string | null>(null);
+  serviceOnline = signal<boolean | null>(null);
 
-  constructor(private diffService: DiffService) {
-    // Auto-validate service health
-    effect(() => {
-      this.diffService.health().subscribe({
-        error: () => console.warn('Diff service not available')
-      });
+  constructor(private diffService: DiffService) {}
+
+  ngOnInit(): void {
+    this.diffService.health().subscribe({
+      next: () => this.serviceOnline.set(true),
+      error: () => {
+        this.serviceOnline.set(false);
+        console.warn('Diff service not available');
+      }
     });
   }
 
@@ -62,3 +66,4 @@ export class DiffPageComponent {
     this.errorMessage.set(null);
   }
 }
+

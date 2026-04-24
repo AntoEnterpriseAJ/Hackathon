@@ -1,7 +1,6 @@
 """API routes for diff operations."""
 
 from flask import Blueprint, request, jsonify
-from io import BytesIO
 import importlib
 
 from config import (
@@ -55,12 +54,12 @@ def diff_documents():
         if file_old.filename == "" or file_new.filename == "":
             return {"error": "Empty filenames"}, 400
         
-        # Read bytes
-        old_bytes = file_old.read()
-        new_bytes = file_new.read()
-        
         # Get parser type from request or use default
         parser_type = request.form.get("parser_type", ACTIVE_PARSER)
+        if parser_type not in PARSER_REGISTRY:
+            return {
+                "error": f"Unknown parser_type: {parser_type}. Available: {list(PARSER_REGISTRY.keys())}"
+            }, 400
         
         # Load implementations
         extractor = _load_implementation(EXTRACTOR_REGISTRY, ACTIVE_EXTRACTOR)
@@ -69,8 +68,8 @@ def diff_documents():
         analyzer = _load_implementation(ANALYZER_REGISTRY, ACTIVE_ANALYZER)
         
         # Extract
-        old_pages = extractor.extract(old_bytes)
-        new_pages = extractor.extract(new_bytes)
+        old_pages = extractor.extract(file_old.stream)
+        new_pages = extractor.extract(file_new.stream)
         
         # Parse
         old_sections = parser.parse(old_pages)
@@ -99,6 +98,9 @@ def diff_documents():
         )
         
         return response.to_dict(), 200
+    except ValueError as e:
+        # Expected input/data errors should be surfaced as client errors.
+        return {"error": str(e)}, 400
     
     except Exception as e:
         if FLASK_DEBUG:

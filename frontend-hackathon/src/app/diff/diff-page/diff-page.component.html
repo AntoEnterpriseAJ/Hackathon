@@ -2,6 +2,14 @@
   <div class="page-header">
     <h1>📄 Diff Analyzer</h1>
     <p>Compare two PDF documents and see changes at a glance</p>
+
+    <!-- Service status badge -->
+    <div class="service-status" *ngIf="serviceOnline() !== null">
+      <span class="status-dot" [class.online]="serviceOnline()" [class.offline]="!serviceOnline()"></span>
+      <span class="status-text">
+        {{ serviceOnline() ? 'Diff service online' : 'Diff service offline — start the Flask server' }}
+      </span>
+    </div>
   </div>
 
   <!-- Error message -->
@@ -10,8 +18,9 @@
     <button (click)="resetResults()">Dismiss</button>
   </div>
 
-  <!-- Upload section -->
+  <!-- Upload section — only enabled when service is online (or status unknown) -->
   <app-diff-upload
+    [disabled]="serviceOnline() === false"
     (filesSelected)="onFilesSelected($event)"
   ></app-diff-upload>
 

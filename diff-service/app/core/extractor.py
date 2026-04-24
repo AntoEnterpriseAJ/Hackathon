@@ -7,7 +7,7 @@ To add a new extractor (e.g. PyMuPDF):
 """
 
 from __future__ import annotations
-from typing import Protocol, runtime_checkable
+from typing import BinaryIO, Protocol, runtime_checkable
 from dataclasses import dataclass, field
 
 
@@ -26,11 +26,11 @@ class PageText:
 class TextExtractor(Protocol):
     """Extracts raw text from a PDF file."""
 
-    def extract(self, file_bytes: bytes) -> list[PageText]:
+    def extract(self, file_input: bytes | bytearray | memoryview | BinaryIO) -> list[PageText]:
         """Return ordered pages of text from a PDF.
 
         Args:
-            file_bytes: Raw bytes of the PDF file.
+            file_input: PDF content as raw bytes or a binary file-like object.
 
         Returns:
             List of PageText, one per page, in page order.

@@ -2,7 +2,7 @@
  * DiffUploadComponent - handles file upload for two PDFs.
  */
 
-import { Component, output } from '@angular/core';
+import { Component, output, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -15,7 +15,8 @@ import { CommonModule } from '@angular/common';
 export class DiffUploadComponent {
   fileOld: File | null = null;
   fileNew: File | null = null;
-  
+  disabled = input<boolean>(false);
+
   filesSelected = output<{ fileOld: File; fileNew: File }>();
 
   onFileOldSelected(event: any) {
@@ -33,12 +34,12 @@ export class DiffUploadComponent {
   }
 
   onCompare() {
-    if (this.fileOld && this.fileNew) {
+    if (this.fileOld && this.fileNew && !this.disabled()) {
       this.filesSelected.emit({ fileOld: this.fileOld, fileNew: this.fileNew });
     }
   }
 
   isReady(): boolean {
-    return this.fileOld !== null && this.fileNew !== null;
+    return this.fileOld !== null && this.fileNew !== null && !this.disabled();
   }
 }
