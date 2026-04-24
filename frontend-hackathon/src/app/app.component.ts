@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 type MessageRole = 'teacher' | 'assistant' | 'system';
 
@@ -23,9 +24,16 @@ interface UploadedDocument {
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = '/api';
+
   acceptedTypes = '.pdf,.png,.jpg,.jpeg,.tif,.tiff,.bmp';
   prompt = '';
   isDragging = false;
+
+  /** Stores extracted document data for use in chat context. */
+  parsedDocuments: ParsedDocument[] = [];
+  isChatLoading = false;
 
   quickActions = [
     'Draft a parent communication summary from these files',
@@ -99,6 +107,60 @@ export class AppComponent {
     this.ingestFiles(event.dataTransfer?.files ?? null);
   }
 
+  private parseFileWithBackend(file: File): void {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.messages = [
+      ...this.messages,
+      this.createMessage('system', `Parsing ${file.name}\u2026`),
+    ];
+
+    this.http
+      .post<ParsedDocument>(`${this.apiUrl}/documents/parse`, formData)
+      .subscribe({
+        next: (result) => {
+          this.parsedDocuments.push(result);
+          this.messages = [
+            ...this.messages,
+            this.createMessage('assistant', this.formatParsedDoc(result, file.name)),
+          ];
+        },
+        error: (err) => {
+          const detail = this.toHttpErrorDetail(err);
+          this.messages = [
+            ...this.messages,
+            this.createMessage('system', `Parse error for ${file.name}: ${detail}`),
+          ];
+        },
+      });
+  }
+
+  private formatParsedDoc(doc: ParsedDocument, filename: string): string {
+    const fieldLines = doc.fields
+      .map((f) => {
+        const val = f.value == null
+          ? (f.field_type === 'signature' ? 'Pending signature' : 'Not provided')
+          : Array.isArray(f.value)
+            ? f.value.join(', ')
+            : String(f.value);
+        const flag = f.confidence !== 'high' ? ` [${f.confidence}]` : '';
+        const sigTag = f.field_type === 'signature' ? ' \u2710' : '';
+        return `\u2022 ${f.key.replace(/_/g, ' ')}: ${val}${flag}${sigTag}`;
+      })
+      .join('\n');
+
+    let msg = `${doc.document_type.replace(/_/g, ' ').toUpperCase()} \u2014 ${filename}\n\n${doc.summary}`;
+    if (fieldLines) {
+      msg += `\n\nExtracted fields:\n${fieldLines}`;
+    }
+    if (doc.tables.length > 0) {
+      const tableNames = doc.tables.map((t) => t.name).join(', ');
+      msg += `\n\n${doc.tables.length} table(s): ${tableNames}.`;
+    }
+    return msg;
+  }
+
   sendMessage(): void {
     const text = this.prompt.trim();
     if (!text) {
@@ -107,9 +169,27 @@ export class AppComponent {
 
     this.messages = [...this.messages, this.createMessage('teacher', text)];
     this.prompt = '';
+    this.isChatLoading = true;
 
-    const response = this.composeAssistantReply(text);
-    this.messages = [...this.messages, this.createMessage('assistant', response)];
+    this.http
+      .post<{ reply: string }>(`${this.apiUrl}/documents/chat`, {
+        message: text,
+        documents: this.parsedDocuments,
+      })
+      .subscribe({
+        next: (res) => {
+          this.isChatLoading = false;
+          this.messages = [...this.messages, this.createMessage('assistant', res.reply)];
+        },
+        error: (err) => {
+          this.isChatLoading = false;
+          const detail = this.toHttpErrorDetail(err);
+          this.messages = [
+            ...this.messages,
+            this.createMessage('system', `Chat error: ${detail}`),
+          ];
+        },
+      });
   }
 
   formatTime(date: Date): string {
@@ -146,16 +226,7 @@ export class AppComponent {
         }
       ];
       accepted.push(file.name);
-    }
-
-    if (accepted.length) {
-      this.messages = [
-        ...this.messages,
-        this.createMessage(
-          'assistant',
-          `Loaded ${accepted.length} document${accepted.length > 1 ? 's' : ''}: ${accepted.join(', ')}. I can now extract fields, summarize key points, and draft your paperwork.`
-        )
-      ];
+      this.parseFileWithBackend(file);
     }
 
     if (rejected.length) {
@@ -168,36 +239,6 @@ export class AppComponent {
 
   private isAllowedFileType(file: File): boolean {
     return this.allowedMimeTypes.has(file.type) || /\.(pdf|png|jpe?g|tif|tiff|bmp)$/i.test(file.name);
-  }
-
-  private composeAssistantReply(userText: string): string {
-    const lower = userText.toLowerCase();
-    const documentSummary = this.documents.length
-      ? `I will use ${this.documents.length} uploaded file${this.documents.length > 1 ? 's' : ''}: ${this.documents
-        .slice(0, 3)
-        .map((doc) => doc.name)
-        .join(', ')}${this.documents.length > 3 ? ', and more' : ''}.`
-      : 'No files are uploaded yet. Please add a PDF or scanned document first so I can extract details accurately.';
-
-    let workflow =
-      'Paperwork plan:\n1. Extract names, dates, and obligations\n2. Draft a clean summary for records\n3. Generate next-step checklist with due dates';
-
-    if (lower.includes('iep') || lower.includes('accommodation')) {
-      workflow =
-        'IEP support plan:\n1. Capture each accommodation request\n2. Align requests to classroom actions\n3. Produce parent-ready summary and implementation checklist';
-    }
-
-    if (lower.includes('attendance') || lower.includes('absence')) {
-      workflow =
-        'Attendance workflow:\n1. Extract dates and reason codes\n2. Draft attendance follow-up note\n3. Create office submission checklist';
-    }
-
-    if (lower.includes('parent') || lower.includes('guardian')) {
-      workflow =
-        'Family communication draft:\n1. Summarize the document in plain language\n2. Flag required signatures or responses\n3. Prepare a concise parent message and internal log note';
-    }
-
-    return `${documentSummary}\n\nRequested task: "${userText}"\n\n${workflow}`;
   }
 
   private toTypeLabel(file: File): string {
@@ -220,6 +261,21 @@ export class AppComponent {
     return 'Document';
   }
 
+  private toHttpErrorDetail(err: { status?: number; statusText?: string; error?: unknown }): string {
+    if (typeof err?.error === 'object' && err.error && 'detail' in err.error) {
+      const detail = (err.error as { detail?: unknown }).detail;
+      if (typeof detail === 'string' && detail.trim()) {
+        return detail;
+      }
+    }
+
+    if (err?.status) {
+      return `HTTP ${err.status}: ${err.statusText}`;
+    }
+
+    return 'No response from API. Confirm ng serve was restarted and the FastAPI server is running on 127.0.0.1:8000.';
+  }
+
   private toSizeLabel(bytes: number): string {
     if (bytes < 1024 * 1024) {
       return `${Math.max(1, Math.round(bytes / 1024))} KB`;
@@ -236,4 +292,25 @@ export class AppComponent {
       timestamp: new Date()
     };
   }
+}
+
+interface ParsedDocument {
+  document_type: string;
+  summary: string;
+  fields: ExtractedField[];
+  tables: ExtractedTable[];
+  source_route: string;
+}
+
+interface ExtractedField {
+  key: string;
+  value: string | number | boolean | string[] | null;
+  field_type: 'string' | 'date' | 'number' | 'boolean' | 'list' | 'signature' | 'id';
+  confidence: 'high' | 'medium' | 'low';
+}
+
+interface ExtractedTable {
+  name: string;
+  headers: string[];
+  rows: string[][];
 }

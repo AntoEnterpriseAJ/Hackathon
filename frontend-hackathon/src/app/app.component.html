@@ -81,7 +81,9 @@
       <div class="composer">
         <textarea [value]="prompt" (input)="handlePromptChange($event)" (keydown)="handlePromptKeydown($event)"
           placeholder="Ask for summaries, parent letters, form drafts, checklists..."></textarea>
-        <button type="button" (click)="sendMessage()">Send</button>
+        <button type="button" (click)="sendMessage()" [disabled]="isChatLoading">
+          {{ isChatLoading ? 'Thinking…' : 'Send' }}
+        </button>
       </div>
     </section>
   </main>
