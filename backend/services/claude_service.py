@@ -460,7 +460,11 @@ _CHAT_SYSTEM_PROMPT = (
     "You help with school paperwork, drafting parent communications, "
     "summarizing documents, creating checklists, and extracting action items. "
     "Be concise, practical, and professional. "
-    "When document context is provided, base your answers strictly on that content."
+    "When document context is provided, base your answers strictly on that content. "
+    "If the user asks to CHANGE / MODIFY / FIX / ADD / REMOVE / UPDATE something "
+    "in a document (e.g. 'schimbă numărul de credite la 5', 'adaugă bibliografia X', "
+    "'corectează titlul'), call the tool `propose_document_edit` instead of just "
+    "answering. Otherwise, answer with `answer_with_followups`."
 )
 
 
@@ -468,18 +472,22 @@ def chat(user_message: str, document_contexts: list[dict]) -> dict:
     """
     Answer a teacher's question, optionally grounded in extracted document data.
 
-    Returns a dict ``{"reply": str, "followups": list[str]}``.
+    Returns ``{"reply": str, "followups": list[str], "edit_proposal": dict | None}``.
     """
     content_parts: list[dict] = []
 
     if document_contexts:
         doc_block = "The following documents have been uploaded and parsed:\n\n"
         for i, doc in enumerate(document_contexts, 1):
-            doc_block += f"--- Document {i}: {doc.get('document_type', 'unknown')} ---\n"
+            doc_id = doc.get("id") or f"doc_{i}"
+            doc_block += (
+                f"--- Document {i} (id={doc_id}): "
+                f"{doc.get('document_type', 'unknown')} ---\n"
+            )
             doc_block += f"Summary: {doc.get('summary', '')}\n"
             fields = doc.get("fields", [])
             if fields:
-                doc_block += "Fields:\n"
+                doc_block += "Fields (use field_key when proposing edits):\n"
                 for f in fields:
                     if isinstance(f, dict):
                         conf = f" [{f.get('confidence','high')}]" if f.get("confidence") != "high" else ""
@@ -505,31 +513,79 @@ def chat(user_message: str, document_contexts: list[dict]) -> dict:
         model=_MODEL,
         max_tokens=_MAX_TOKENS,
         system=_CHAT_SYSTEM_PROMPT,
-        tools=[_CHAT_REPLY_TOOL],
-        tool_choice={"type": "tool", "name": "answer_with_followups"},
+        tools=[_CHAT_REPLY_TOOL, _PROPOSE_EDIT_TOOL],
+        tool_choice={"type": "auto"},
         messages=[{"role": "user", "content": content_parts}],
     )
 
     for block in response.content:
-        if getattr(block, "type", None) == "tool_use":
-            payload = dict(block.input)  # type: ignore[union-attr]
-            reply = str(payload.get("reply", "")).strip()
-            raw_followups = payload.get("followups", []) or []
-            followups: list[str] = []
-            if isinstance(raw_followups, list):
-                for item in raw_followups[:3]:
-                    s = str(item).strip()
-                    if s:
-                        followups.append(s)
-            return {"reply": reply, "followups": followups}
+        if getattr(block, "type", None) != "tool_use":
+            continue
+        name = getattr(block, "name", "")
+        payload = dict(block.input)  # type: ignore[union-attr]
+        if name == "propose_document_edit":
+            return _normalize_edit_payload(payload)
+        if name == "answer_with_followups":
+            return _normalize_chat_payload(payload)
 
-    # Fallback: no tool_use returned (shouldn't happen with tool_choice).
+    # Fallback: no tool_use returned (rare with tool_choice=auto).
     text = ""
     for block in response.content:
         if getattr(block, "type", None) == "text":
             text = block.text  # type: ignore[union-attr]
             break
-    return {"reply": text, "followups": []}
+    return {"reply": text, "followups": [], "edit_proposal": None}
+
+
+def _normalize_chat_payload(payload: dict) -> dict:
+    reply = str(payload.get("reply", "")).strip()
+    raw_followups = payload.get("followups", []) or []
+    followups: list[str] = []
+    if isinstance(raw_followups, list):
+        for item in raw_followups[:3]:
+            s = str(item).strip()
+            if s:
+                followups.append(s)
+    return {"reply": reply, "followups": followups, "edit_proposal": None}
+
+
+def _ALLOWED_OPS() -> set[str]:
+    return {"set", "add", "remove"}
+
+
+def _normalize_edit_payload(payload: dict) -> dict:
+    reply = str(payload.get("reply", "")).strip()
+    summary = str(payload.get("summary", "")).strip()
+    doc_id = str(payload.get("doc_id", "")).strip() or None
+    raw_patches = payload.get("patches", []) or []
+    patches: list[dict] = []
+    if isinstance(raw_patches, list):
+        for raw in raw_patches:
+            if not isinstance(raw, dict):
+                continue
+            op = str(raw.get("op", "set")).strip().lower()
+            if op not in _ALLOWED_OPS():
+                continue
+            field_key = str(raw.get("field_key", "")).strip()
+            if not field_key:
+                continue
+            patch: dict = {
+                "op": op,
+                "field_key": field_key,
+                "reason": str(raw.get("reason", "")).strip(),
+            }
+            if op != "remove":
+                patch["new_value"] = raw.get("new_value")
+            patches.append(patch)
+    return {
+        "reply": reply or summary or "Am pregătit modificările propuse.",
+        "followups": [],
+        "edit_proposal": {
+            "summary": summary,
+            "doc_id": doc_id,
+            "patches": patches,
+        },
+    }
 
 
 _CHAT_REPLY_TOOL: dict = {
@@ -560,6 +616,69 @@ _CHAT_REPLY_TOOL: dict = {
             },
         },
         "required": ["reply", "followups"],
+    },
+}
+
+
+_PROPOSE_EDIT_TOOL: dict = {
+    "name": "propose_document_edit",
+    "description": (
+        "Propose concrete changes to one of the uploaded documents. Use this "
+        "whenever the user asks to change, fix, add, remove, or update a value. "
+        "Always reference fields by their exact `field_key` from the doc context. "
+        "Each patch is one of: set (replace existing field's value), add (new "
+        "field), remove (delete the field). Keep `new_value` in the same shape "
+        "as the existing field (string for strings, list for lists)."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "reply": {
+                "type": "string",
+                "description": (
+                    "Short message shown above the diff card, in the user's "
+                    "language. e.g. 'Am pregătit 2 modificări — confirmă-le mai jos.'"
+                ),
+            },
+            "summary": {
+                "type": "string",
+                "description": "One-line description of what is being changed and why.",
+            },
+            "doc_id": {
+                "type": "string",
+                "description": "The id of the target document (from the doc context).",
+            },
+            "patches": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "op": {
+                            "type": "string",
+                            "enum": ["set", "add", "remove"],
+                            "description": "Operation kind.",
+                        },
+                        "field_key": {
+                            "type": "string",
+                            "description": "Exact field key as listed in the doc context.",
+                        },
+                        "new_value": {
+                            "description": (
+                                "New value for set/add. Must match the field's "
+                                "current shape: a string, number, or array of strings."
+                            ),
+                        },
+                        "reason": {
+                            "type": "string",
+                            "description": "Brief justification for this change.",
+                        },
+                    },
+                    "required": ["op", "field_key"],
+                },
+                "description": "Ordered list of changes to apply.",
+            },
+        },
+        "required": ["reply", "summary", "doc_id", "patches"],
     },
 }
 

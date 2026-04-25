@@ -66,9 +66,34 @@ class ChatRequest(BaseModel):
     documents: list[dict] = []
 
 
+class EditPatch(BaseModel):
+    op: str  # set | add | remove
+    field_key: str
+    new_value: Any | None = None
+    reason: str = ""
+
+
+class EditProposal(BaseModel):
+    summary: str = ""
+    doc_id: str | None = None
+    patches: list[EditPatch] = []
+
+
 class ChatResponse(BaseModel):
     reply: str
     followups: list[str] = []
+    edit_proposal: EditProposal | None = None
+
+
+class ApplyPatchesRequest(BaseModel):
+    doc: dict[str, Any]
+    patches: list[EditPatch]
+
+
+class ApplyPatchesResponse(BaseModel):
+    doc: dict[str, Any]
+    applied: list[EditPatch] = []
+    skipped: list[dict[str, Any]] = []
 
 
 class ValidateTemplateRequest(BaseModel):
@@ -281,7 +306,64 @@ async def chat(req: ChatRequest) -> ChatResponse:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Chat failed: {exc}") from exc
-    return ChatResponse(reply=result.get("reply", ""), followups=result.get("followups", []))
+    return ChatResponse(
+        reply=result.get("reply", ""),
+        followups=result.get("followups", []),
+        edit_proposal=result.get("edit_proposal"),
+    )
+
+
+@router.post("/apply-patches", response_model=ApplyPatchesResponse)
+async def apply_patches(req: ApplyPatchesRequest) -> ApplyPatchesResponse:
+    """Apply chat-proposed edit patches to a parsed document.
+
+    Patches are field-level: ``set`` replaces an existing field's value,
+    ``add`` appends a new field, ``remove`` deletes the field by key.
+    Each patch is matched against ``doc['fields'][*]['key']``.
+    """
+    doc = json.loads(json.dumps(req.doc))  # deep copy
+    fields = doc.get("fields")
+    if not isinstance(fields, list):
+        fields = []
+        doc["fields"] = fields
+
+    applied: list[EditPatch] = []
+    skipped: list[dict[str, Any]] = []
+
+    for patch in req.patches:
+        idx = next(
+            (i for i, f in enumerate(fields)
+             if isinstance(f, dict) and f.get("key") == patch.field_key),
+            -1,
+        )
+        if patch.op == "set":
+            if idx < 0:
+                skipped.append({"patch": patch.model_dump(), "reason": "field_not_found"})
+                continue
+            fields[idx]["value"] = patch.new_value
+            fields[idx]["confidence"] = "high"
+            applied.append(patch)
+        elif patch.op == "add":
+            if idx >= 0:
+                fields[idx]["value"] = patch.new_value
+                fields[idx]["confidence"] = "high"
+            else:
+                fields.append({
+                    "key": patch.field_key,
+                    "value": patch.new_value,
+                    "confidence": "high",
+                })
+            applied.append(patch)
+        elif patch.op == "remove":
+            if idx < 0:
+                skipped.append({"patch": patch.model_dump(), "reason": "field_not_found"})
+                continue
+            fields.pop(idx)
+            applied.append(patch)
+        else:
+            skipped.append({"patch": patch.model_dump(), "reason": "unknown_op"})
+
+    return ApplyPatchesResponse(doc=doc, applied=applied, skipped=skipped)
 
 
 @router.post("/validate", response_model=ValidationResult)

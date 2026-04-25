@@ -32,6 +32,48 @@
             <div class="role">{{ m.role === 'user' ? '🧑' : '🤖' }}</div>
             @if (m.role === 'assistant') {
               <div class="text md" [innerHTML]="renderMarkdown(m.text)"></div>
+              @if (m.editProposal; as ep) {
+                <div class="edit-card" [class.applied]="ep.status === 'applied'" [class.rejected]="ep.status === 'rejected'">
+                  <div class="edit-card-head">
+                    <span class="edit-icon">✎</span>
+                    <span class="edit-summary">{{ ep.summary || 'Modificări propuse' }}</span>
+                    <span class="edit-count">{{ ep.patches.length }}</span>
+                  </div>
+                  <ul class="edit-diff">
+                    @for (p of ep.patches; track $index) {
+                      <li class="edit-row">
+                        <span class="edit-op edit-op-{{ p.op }}">{{ opLabel(p.op) }}</span>
+                        <span class="edit-key">{{ p.field_key }}</span>
+                        @if (p.op !== 'add') {
+                          <div class="edit-line edit-old">
+                            <span class="edit-marker">−</span>
+                            <span class="edit-val">{{ formatValue(oldValueFor(ep, p.field_key)) }}</span>
+                          </div>
+                        }
+                        @if (p.op !== 'remove') {
+                          <div class="edit-line edit-new">
+                            <span class="edit-marker">+</span>
+                            <span class="edit-val">{{ formatValue(p.new_value) }}</span>
+                          </div>
+                        }
+                        @if (p.reason) {
+                          <div class="edit-reason">↳ {{ p.reason }}</div>
+                        }
+                      </li>
+                    }
+                  </ul>
+                  @if (ep.status === 'pending') {
+                    <div class="edit-actions">
+                      <button class="edit-accept" (click)="acceptProposal(m.id, ep)">✓ Aplică</button>
+                      <button class="edit-reject" (click)="rejectProposal(m.id, ep)">Renunță</button>
+                    </div>
+                  } @else if (ep.status === 'applied') {
+                    <div class="edit-status edit-status-applied">✓ Aplicat</div>
+                  } @else {
+                    <div class="edit-status edit-status-rejected">Renunțat</div>
+                  }
+                </div>
+              }
               @if (m.followups?.length) {
                 <div class="followup-chips">
                   @for (f of m.followups; track f) {

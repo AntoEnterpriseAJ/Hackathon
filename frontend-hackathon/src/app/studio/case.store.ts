@@ -43,7 +43,24 @@ export interface ChatMessage {
   /** Optional inline actions rendered as buttons next to the message. */
   actions?: ChatAction[];
   contextChips?: string[];
+  /** Proposed structured edits (assistant messages only). */
+  editProposal?: EditProposal;
   ts: number;
+}
+
+export interface EditPatch {
+  op: 'set' | 'add' | 'remove';
+  field_key: string;
+  new_value?: unknown;
+  reason?: string;
+}
+
+export interface EditProposal {
+  summary: string;
+  doc_id: string | null;
+  patches: EditPatch[];
+  /** UI state: 'pending' | 'applied' | 'rejected'. */
+  status: 'pending' | 'applied' | 'rejected';
 }
 
 export type ChatAction =
@@ -202,6 +219,12 @@ export class CaseStore {
     const m: ChatMessage = { ...msg, id: cryptoId(), ts: Date.now() };
     this._chat.update((arr) => [...arr, m]);
     return m;
+  }
+
+  updateChat(id: string, patch: Partial<ChatMessage>): void {
+    this._chat.update((arr) =>
+      arr.map((m) => (m.id === id ? { ...m, ...patch } : m)),
+    );
   }
 
   clearChat(): void {

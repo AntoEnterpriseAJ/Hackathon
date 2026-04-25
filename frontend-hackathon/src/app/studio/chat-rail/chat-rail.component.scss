@@ -126,6 +126,120 @@
       &:active:not(:disabled) { transform: scale(0.97); }
       &:disabled { opacity: 0.5; cursor: not-allowed; }
     }
+
+    /* --- Edit-proposal diff card ---------------------------------- */
+    .edit-card {
+      flex: 1 1 100%;
+      margin-top: 8px;
+      margin-left: 20px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #fafafa;
+      font-size: 12px;
+      overflow: hidden;
+      &.applied { border-color: #86efac; background: #f0fdf4; }
+      &.rejected { opacity: 0.55; }
+    }
+    .edit-card-head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: #f3f4f6;
+      border-bottom: 1px solid #e5e7eb;
+      font-weight: 600;
+      .edit-icon { color: #6366f1; }
+      .edit-summary { flex: 1; color: #1f2937; }
+      .edit-count {
+        background: #e5e7eb;
+        color: #4b5563;
+        padding: 1px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+      }
+    }
+    .edit-diff {
+      list-style: none;
+      margin: 0;
+      padding: 6px 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11.5px;
+    }
+    .edit-row {
+      padding: 4px 0;
+      & + & { border-top: 1px dashed #e5e7eb; }
+    }
+    .edit-op {
+      display: inline-block;
+      padding: 0 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-right: 6px;
+    }
+    .edit-op-set    { background: #fef3c7; color: #92400e; }
+    .edit-op-add    { background: #dcfce7; color: #166534; }
+    .edit-op-remove { background: #fee2e2; color: #991b1b; }
+    .edit-key {
+      color: #4338ca;
+      font-weight: 600;
+    }
+    .edit-line {
+      display: flex;
+      gap: 4px;
+      padding: 1px 0 1px 6px;
+      border-radius: 3px;
+      margin-top: 2px;
+    }
+    .edit-old { background: #fef2f2; color: #7f1d1d; }
+    .edit-new { background: #ecfdf5; color: #064e3b; }
+    .edit-marker { width: 10px; flex-shrink: 0; font-weight: 700; opacity: 0.6; }
+    .edit-val { word-break: break-word; white-space: pre-wrap; flex: 1; }
+    .edit-reason {
+      margin-top: 3px;
+      padding-left: 16px;
+      color: #6b7280;
+      font-style: italic;
+      font-family: inherit;
+    }
+    .edit-actions {
+      display: flex;
+      gap: 6px;
+      padding: 6px 10px;
+      border-top: 1px solid #e5e7eb;
+      background: #f9fafb;
+      button {
+        flex: 1;
+        padding: 5px 10px;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .edit-accept {
+        background: #16a34a;
+        color: #fff;
+        &:hover { background: #15803d; }
+      }
+      .edit-reject {
+        background: #fff;
+        color: #6b7280;
+        border-color: #d1d5db;
+        &:hover { background: #f3f4f6; color: #1f2937; }
+      }
+    }
+    .edit-status {
+      padding: 5px 10px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      border-top: 1px solid #e5e7eb;
+    }
+    .edit-status-applied { background: #ecfdf5; color: #166534; }
+    .edit-status-rejected { background: #f9fafb; color: #6b7280; }
   }
 
   &.user .bubble { background: #6366f1; color: #fff; .role { display:none; } }

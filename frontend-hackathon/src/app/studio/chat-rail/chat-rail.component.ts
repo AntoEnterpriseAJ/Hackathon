@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { CaseStore, CaseDocument } from '../case.store';
+import { CaseStore, CaseDocument, EditPatch, EditProposal } from '../case.store';
 import { SyncCheckService } from '../../sync-check/services/sync-check.service';
 import { ExtractedDocument } from '../../sync-check/models/sync.models';
 
@@ -76,19 +76,39 @@ export class ChatRailComponent {
       const documents: unknown[] = [];
       if (doc) {
         const parsed = await this.ensureParsed(doc);
-        if (parsed) documents.push(this.condenseForChat(parsed));
+        if (parsed) documents.push(this.condenseForChat(doc.id, parsed));
       }
 
       const resp = await firstValueFrom(
-        this.http.post<{ reply: string; followups?: string[] }>('/api/documents/chat', {
+        this.http.post<{
+          reply: string;
+          followups?: string[];
+          edit_proposal?: {
+            summary: string;
+            doc_id: string | null;
+            patches: EditPatch[];
+          } | null;
+        }>('/api/documents/chat', {
           message: text,
           documents,
         }),
       );
+
+      const editProposal: EditProposal | undefined = resp.edit_proposal
+        ? {
+            summary: resp.edit_proposal.summary,
+            // Backend may return the parsed-doc id (preferred) or null.
+            doc_id: resp.edit_proposal.doc_id || doc?.id || null,
+            patches: resp.edit_proposal.patches ?? [],
+            status: 'pending',
+          }
+        : undefined;
+
       this.store.appendChat({
         role: 'assistant',
         text: resp.reply,
         followups: (resp.followups ?? []).slice(0, 3),
+        editProposal,
       });
     } catch (err: unknown) {
       const e = err as { error?: { detail?: string }; message?: string };
@@ -122,7 +142,7 @@ export class ChatRailComponent {
    * (bibliography especially) to a reasonable head so we don't burn tokens or
    * trip request-size limits.
    */
-  private condenseForChat(doc: ExtractedDocument): unknown {
+  private condenseForChat(docId: string, doc: ExtractedDocument): unknown {
     const MAX_LIST = 25;
     const fields = doc.fields.map((f) => {
       if (Array.isArray(f.value) && f.value.length > MAX_LIST) {
@@ -136,7 +156,7 @@ export class ChatRailComponent {
       }
       return f;
     });
-    return { ...doc, fields };
+    return { id: docId, ...doc, fields };
   }
 
   protected quickAction(kind: 'explain' | 'improve' | 'summarize'): void {
@@ -162,6 +182,88 @@ export class ChatRailComponent {
     if (this.sending()) return;
     this.draft.set(text);
     this.send();
+  }
+
+  // --- edit-proposal handling -------------------------------------------
+
+  /** Look up the current value of a field key in the doc the proposal targets. */
+  protected oldValueFor(proposal: EditProposal, fieldKey: string): unknown {
+    const docId = proposal.doc_id;
+    if (!docId) return undefined;
+    const doc = this.store.documents().find((d) => d.id === docId);
+    const parsed = doc?.parsed as ExtractedDocument | undefined;
+    const f = parsed?.fields.find((x) => x.key === fieldKey);
+    return f?.value;
+  }
+
+  /** Render any value as a compact, single-line string for the diff card. */
+  protected formatValue(v: unknown): string {
+    if (v === undefined || v === null) return '—';
+    if (Array.isArray(v)) {
+      if (v.length === 0) return '[ ]';
+      if (v.length === 1) return String(v[0]);
+      return `[${v.length} elemente] ${String(v[0]).slice(0, 60)}…`;
+    }
+    if (typeof v === 'object') return JSON.stringify(v).slice(0, 120);
+    const s = String(v);
+    return s.length > 160 ? s.slice(0, 160) + '…' : s;
+  }
+
+  protected opLabel(op: string): string {
+    return op === 'set' ? 'MODIFICĂ' : op === 'add' ? 'ADAUGĂ' : 'ȘTERGE';
+  }
+
+  /** Apply the proposal: POST to backend, swap parsed doc on the store. */
+  protected async acceptProposal(messageId: string, proposal: EditProposal): Promise<void> {
+    if (proposal.status !== 'pending') return;
+    const docId = proposal.doc_id;
+    const doc = docId ? this.store.documents().find((d) => d.id === docId) : null;
+    if (!doc || !doc.parsed) {
+      this.store.updateChat(messageId, {
+        editProposal: { ...proposal, status: 'rejected' },
+      });
+      this.store.appendChat({
+        role: 'assistant',
+        text: '⚠ Nu am găsit documentul țintă pentru aceste modificări.',
+      });
+      return;
+    }
+    try {
+      const resp = await firstValueFrom(
+        this.http.post<{
+          doc: ExtractedDocument;
+          applied: EditPatch[];
+          skipped: { patch: EditPatch; reason: string }[];
+        }>('/api/documents/apply-patches', {
+          doc: doc.parsed,
+          patches: proposal.patches,
+        }),
+      );
+      this.store.updateDocument(doc.id, { parsed: resp.doc });
+      this.store.updateChat(messageId, {
+        editProposal: { ...proposal, status: 'applied' },
+      });
+      const skippedNote = resp.skipped.length
+        ? ` (${resp.skipped.length} ignorate: ${resp.skipped.map((s) => s.reason).join(', ')})`
+        : '';
+      this.store.appendChat({
+        role: 'assistant',
+        text: `✓ Am aplicat ${resp.applied.length} modificare/i pe „${doc.name}”.${skippedNote}`,
+      });
+    } catch (err: unknown) {
+      const e = err as { error?: { detail?: string }; message?: string };
+      this.store.appendChat({
+        role: 'assistant',
+        text: `⚠ Nu am putut aplica modificările: ${e?.error?.detail || e?.message || 'eroare'}`,
+      });
+    }
+  }
+
+  protected rejectProposal(messageId: string, proposal: EditProposal): void {
+    if (proposal.status !== 'pending') return;
+    this.store.updateChat(messageId, {
+      editProposal: { ...proposal, status: 'rejected' },
+    });
   }
 
   /**
