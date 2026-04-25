@@ -29,6 +29,7 @@ from services.diff_explainer import explain_diff
 from services.document_classifier import classify as classify_document
 from services.fd_bundle_splitter import split_fd_bundle
 from services.fd_fast_parser import parse_fd as fast_parse_fd
+from services.fd_field_normalizer import normalize_fd_fields
 from services.bibliography_checker import (
     BibliographyReport,
     check_bibliography,
@@ -67,6 +68,7 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     reply: str
+    followups: list[str] = []
 
 
 class ValidateTemplateRequest(BaseModel):
@@ -221,6 +223,7 @@ async def parse_document(
             if kind == "fd":
                 fast = fast_parse_fd(file_bytes)
                 if fast is not None:
+                    fast = normalize_fd_fields(fast)
                     parse_cache.put(cache_key, fast)
                     return fast
             elif kind == "pi":
@@ -247,6 +250,7 @@ async def parse_document(
 
         raw = _normalize_extracted_payload(raw)
         extracted = ExtractedDocument(**raw, source_route=source_route)
+        extracted = normalize_fd_fields(extracted)
         parse_cache.put(cache_key, extracted)
         return extracted
 
@@ -272,12 +276,12 @@ async def parse_document(
 async def chat(req: ChatRequest) -> ChatResponse:
     """Answer a teacher's question, optionally grounded in extracted document data."""
     try:
-        reply = claude_service.chat(req.message, req.documents)
+        result = claude_service.chat(req.message, req.documents)
     except RuntimeError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Chat failed: {exc}") from exc
-    return ChatResponse(reply=reply)
+    return ChatResponse(reply=result.get("reply", ""), followups=result.get("followups", []))
 
 
 @router.post("/validate", response_model=ValidationResult)

@@ -21,16 +21,6 @@
         }
       </select>
     </label>
-
-    <label class="chip">
-      <span class="chip-label">📕 Plan (opt.)</span>
-      <select (change)="onPickPlan($event)">
-        <option value="">— none —</option>
-        @for (d of planOptions(); track d.id) {
-          <option [value]="d.id" [selected]="d.id === planId()">{{ d.name }}</option>
-        }
-      </select>
-    </label>
   </header>
 
   <div class="action-bar">
@@ -52,19 +42,31 @@
 
   @if (outcome()) {
     @let r = outcome()!.report;
+    @let stats = mappingStats();
     <section class="report">
       <h4>Section mapping</h4>
-      <p class="legend">✅ exact · ⚖ fuzzy · ✨ AI · ⛔ placeholder</p>
-      <ul class="match-list">
-        @for (m of r.matches; track m.new_heading) {
-          <li>
-            <span class="conf">{{ confidenceLabel(m.confidence) }}</span>
-            <span class="new">{{ m.new_heading }}</span>
-            <span class="arrow">←</span>
-            <span class="old">{{ m.old_heading || '(placeholder)' }}</span>
-          </li>
-        }
-      </ul>
+      <p class="summary">
+        {{ r.matches.length }} secțiuni reconciliate —
+        <span class="pill ok">✅ {{ stats.exact }} exact</span>
+        <span class="pill">⚖ {{ stats.fuzzy }} fuzzy</span>
+        <span class="pill">✨ {{ stats.ai }} AI</span>
+        <span class="pill warn">⛔ {{ stats.placeholder }} placeholder</span>
+      </p>
+      @if (r.matches.length) {
+        <details>
+          <summary>Detalii mapare</summary>
+          <ul class="match-list">
+            @for (m of r.matches; track m.new_heading) {
+              <li>
+                <span class="conf">{{ confidenceLabel(m.confidence) }}</span>
+                <span class="new">{{ m.new_heading }}</span>
+                <span class="arrow">←</span>
+                <span class="old">{{ m.old_heading || '(placeholder)' }}</span>
+              </li>
+            }
+          </ul>
+        </details>
+      }
 
       @if (r.admin_updates.length) {
         <details>

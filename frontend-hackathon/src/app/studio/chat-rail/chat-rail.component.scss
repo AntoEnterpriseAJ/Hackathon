@@ -41,6 +41,21 @@
     padding: 2px 6px;
     border-radius: 10px;
   }
+  .ctx-select {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 12px;
+    padding: 2px 4px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: #fff;
+    max-width: 100%;
+  }
+  .ctx-status {
+    color: #6b7280;
+    font-style: italic;
+    &.ok { color: #16a34a; font-style: normal; }
+  }
 }
 
 .messages {
@@ -66,6 +81,7 @@
 
   .bubble {
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
     max-width: 85%;
     background: #f3f4f6;
@@ -73,7 +89,43 @@
     padding: 8px 10px;
     line-height: 1.4;
     .role { font-size: 14px; }
-    .text { white-space: pre-wrap; }
+    .text { white-space: pre-wrap; flex: 1 1 auto; min-width: 0; }
+    .text.md {
+      white-space: normal;
+      p { margin: 0 0 6px; &:last-child { margin-bottom: 0; } }
+      ul, ol { margin: 4px 0 6px; padding-left: 20px; }
+      li { margin: 2px 0; }
+      code {
+        background: rgba(0,0,0,0.06);
+        padding: 1px 4px;
+        border-radius: 4px;
+        font-size: 0.9em;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      strong { font-weight: 600; }
+      em { font-style: italic; }
+    }
+    .followup-chips {
+      flex: 1 1 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+      padding-left: 20px;
+    }
+    .followup-chip {
+      background: #eef2ff;
+      color: #4338ca;
+      border: 1px solid #c7d2fe;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      &:hover:not(:disabled) { background: #dbeafe; }
+      &:active:not(:disabled) { transform: scale(0.97); }
+      &:disabled { opacity: 0.5; cursor: not-allowed; }
+    }
   }
 
   &.user .bubble { background: #6366f1; color: #fff; .role { display:none; } }

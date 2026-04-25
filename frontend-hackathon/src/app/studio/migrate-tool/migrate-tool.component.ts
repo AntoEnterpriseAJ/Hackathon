@@ -23,7 +23,6 @@ export class MigrateToolComponent {
 
   protected readonly fdId = signal<string | null>(null);
   protected readonly templateId = signal<string | null>(null);
-  protected readonly planId = signal<string | null>(null);
   protected readonly running = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly outcome = signal<RunOutcome | null>(null);
@@ -34,9 +33,19 @@ export class MigrateToolComponent {
   protected readonly templateOptions = computed(() =>
     this.store.documentsByKind().template,
   );
-  protected readonly planOptions = computed(() =>
-    this.store.documentsByKind().plan,
-  );
+
+  /** Per-confidence-bucket counts for the mapping summary. */
+  protected readonly mappingStats = computed(() => {
+    const matches = this.outcome()?.report.matches ?? [];
+    const stats = { exact: 0, fuzzy: 0, ai: 0, placeholder: 0 };
+    for (const m of matches) {
+      if (m.confidence === 'exact') stats.exact++;
+      else if (m.confidence === 'fuzzy') stats.fuzzy++;
+      else if (m.confidence === 'placeholder') stats.placeholder++;
+      else stats.ai++;
+    }
+    return stats;
+  });
 
   constructor() {
     // Auto-pick first available doc per slot whenever the case changes.
@@ -68,13 +77,12 @@ export class MigrateToolComponent {
     const fd = this.docFile(this.fdId());
     const tpl = this.docFile(this.templateId());
     if (!fd || !tpl) return;
-    const plan = this.docFile(this.planId());
 
     this.error.set(null);
     this.outcome.set(null);
     this.running.set(true);
 
-    this.service.migrate(fd, tpl, plan).subscribe({
+    this.service.migrate(fd, tpl, null).subscribe({
       next: (res: ShiftResult) => {
         this.running.set(false);
         const url = URL.createObjectURL(res.blob);
@@ -121,8 +129,5 @@ export class MigrateToolComponent {
   }
   protected onPickTemplate(event: Event): void {
     this.templateId.set((event.target as HTMLSelectElement).value || null);
-  }
-  protected onPickPlan(event: Event): void {
-    this.planId.set((event.target as HTMLSelectElement).value || null);
   }
 }

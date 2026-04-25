@@ -10,6 +10,19 @@
         }
       </select>
     </label>
+    @if (splitting()) {
+      <span class="muted">📚 splitting bundle…</span>
+    } @else if (slices().length > 1) {
+      <label class="chip">
+        <span class="chip-label">📚 Curs</span>
+        <select (change)="onPickSlice($event)">
+          @for (s of slices(); track s.index) {
+            <option [value]="s.index" [selected]="s.index === sliceIndex()">{{ sliceLabel(s) }}</option>
+          }
+        </select>
+      </label>
+      <span class="muted">{{ slices().length }} discipline detectate</span>
+    }
   </header>
 
   <div class="action-bar">

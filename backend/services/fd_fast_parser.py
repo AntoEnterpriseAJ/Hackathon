@@ -26,6 +26,12 @@ _RE_PROGRAM = re.compile(r"1\.6\s*Programul\s+de\s+studii[^\n]*?\s+(.+)")
 # --- Section 2: course identity ----------------------------------------------
 _RE_DENUMIRE = re.compile(r"2\.1\s*Denumirea\s+disciplinei\s+(.+)")
 _RE_TITULAR_CURS = re.compile(r"2\.2\s*Titularul\s+activităților\s+de\s+curs\s+(.+)")
+# 2.3 "Titularul activităților de seminar/ laborator/ <NAME>\nproiect".
+# Some FDs split the label across two lines; we capture the value that
+# follows the second slash on the same line.
+_RE_TITULAR_SLP = re.compile(
+    r"2\.3\s*Titularul\s+activit[ăa][țt]ilor\s+de\s+seminar[/ ]+\s*laborator[/ ]+\s*(.+)"
+)
 # Numeric fields can be followed inline by the value OR on the next line
 # ("2.4 Anul de studiu 2.5 Semestrul ...\n1 1 E DC"). Reject section-number
 # tokens like "2.5" by requiring 1–2 digits with no dot.
@@ -72,8 +78,41 @@ _RE_CREDITE = re.compile(
     r"3\.9\s*Num[ăa]rul\s+de\s+credite\s*(?:\d+\s*\))?\s*(\d+(?:[.,]\d+)?)"
 )
 
+# --- Section 7: obiective ----------------------------------------------------
+# 7.1 "Obiectivul general al disciplinei <body>" — body may span several
+# lines; we capture greedily until the next 7.x / 8.x heading.
+_RE_OBIECTIV_GENERAL = re.compile(
+    r"7\.1\s*Obiectivul\s+general\s+al\s+disciplinei\s+(.+?)(?=\n\s*7\.\d|\n\s*8\.|\Z)",
+    re.DOTALL,
+)
+
 # --- Section 8: competence codes (CP*/CT*) -----------------------------------
 _RE_COMPETENTA = re.compile(r"\b(CP\d+|CT\d+)\b")
+
+# --- Bibliografie ------------------------------------------------------------
+# A bibliography block starts with a "Bibliografie" heading on its own line
+# and runs until the next FD section we know about. We DON'T terminate on
+# any "<digit>. <Uppercase>" line because that pattern also matches numbered
+# bibliography entries themselves (e.g. "1. S. Chiriță, ..."). Instead we
+# stop at the next sub-section heading ("8.2 ...") OR an explicit known
+# top-level heading keyword (Coroborarea, Evaluare, Repartizarea, Bibliografie).
+_RE_BIB_BLOCK = re.compile(
+    r"(?im)^[ \t]*Bibliografie[^\n]*\n(.+?)"
+    r"(?="
+    r"^[ \t]*\d+\.\d+[ \t]+[A-Za-zȘȚĂÎÂșțăîâ]"          # e.g. "8.2 Seminar..."
+    r"|^[ \t]*\d+\.?[ \t]+(?:Coroborarea|Evaluare|Repartizarea|Standard)\b"
+    r"|^[ \t]*Bibliografie\b"
+    r"|\Z"
+    r")",
+    re.DOTALL,
+)
+# Inside a block, an entry begins with either a bullet (• - *), a leading
+# number ("1. ", "12. ") or a bracketed citation key ("[1]", "[12]").
+# Use that prefix as a split anchor.
+_RE_BIB_ENTRY_SPLIT = re.compile(r"(?m)^\s*(?:[\u2022\-\*]|\d{1,3}\.|\[\d{1,3}\])\s+")
+# Lines we never want to keep as bibliography entries (form footers, page
+# markers, stray whitespace stubs).
+_RE_BIB_NOISE = re.compile(r"^(?:F\d{2}\.\d|Pag(?:e|ina)?\b|\d+\s*$)", re.IGNORECASE)
 
 
 def parse_fd(pdf_bytes: bytes) -> ExtractedDocument | None:
@@ -139,6 +178,7 @@ def parse_fd(pdf_bytes: bytes) -> ExtractedDocument | None:
     # Course identity
     _add_str("denumirea_disciplinei", _first(_RE_DENUMIRE))
     _add_str("titular_curs", _first(_RE_TITULAR_CURS))
+    _add_str("titular_seminar_laborator_proiect", _first(_RE_TITULAR_SLP))
 
     # Section 2.4-2.7 has two layouts: (a) inline `2.4 ... <val> 2.5 ...` and
     # (b) labels-on-one-line, values-on-the-next. Try inline first, then
@@ -219,7 +259,18 @@ def parse_fd(pdf_bytes: bytes) -> ExtractedDocument | None:
     _add_num("total_ore_pe_semestru", _first(_RE_TOTAL_SEM_GLOBAL))
     _add_num("numarul_de_credite", _first(_RE_CREDITE))
 
-    # Competence codes (deduped, order-preserving)
+    # Obiectivul general (section 7.1) — may be multi-line.
+    obiectiv_match = _RE_OBIECTIV_GENERAL.search(full_text)
+    if obiectiv_match:
+        obiectiv = re.sub(r"\s+", " ", obiectiv_match.group(1)).strip(" .,;•")
+        if obiectiv:
+            fields.append(ExtractedField(
+                key="obiective_generale_ale_disciplinei",
+                value=obiectiv,
+                field_type="string",
+            ))
+
+    # Competence codes (deduped, order-preserving), then split CP/CT.
     seen: set[str] = set()
     competente: list[str] = []
     for m in _RE_COMPETENTA.finditer(full_text):
@@ -231,6 +282,45 @@ def parse_fd(pdf_bytes: bytes) -> ExtractedDocument | None:
         fields.append(ExtractedField(
             key="competente_referite",
             value=competente,
+            field_type="list",
+        ))
+        cp_codes = [c for c in competente if c.startswith("CP")]
+        ct_codes = [c for c in competente if c.startswith("CT")]
+        if cp_codes:
+            fields.append(ExtractedField(
+                key="competente_profesionale",
+                value=cp_codes,
+                field_type="list",
+            ))
+        if ct_codes:
+            fields.append(ExtractedField(
+                key="competente_transversale",
+                value=ct_codes,
+                field_type="list",
+            ))
+
+    # Bibliografie — collect all entries from every "Bibliografie" block.
+    bib_entries: list[str] = []
+    for bm in _RE_BIB_BLOCK.finditer(full_text):
+        block = bm.group(1)
+        # Split on bullet/number prefix; ignore anything before the first prefix.
+        parts = _RE_BIB_ENTRY_SPLIT.split(block)
+        if len(parts) <= 1:
+            # No prefix found — treat each non-empty line as an entry.
+            parts = [ln for ln in block.splitlines() if ln.strip()]
+        else:
+            parts = parts[1:]  # drop the pre-first-prefix preamble
+        for raw in parts:
+            entry = re.sub(r"\s+", " ", raw).strip(" .,;")
+            if len(entry) < 10:
+                continue
+            if _RE_BIB_NOISE.match(entry):
+                continue
+            bib_entries.append(entry)
+    if bib_entries:
+        fields.append(ExtractedField(
+            key="bibliografie",
+            value=bib_entries,
             field_type="list",
         ))
 

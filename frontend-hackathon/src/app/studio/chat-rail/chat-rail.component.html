@@ -7,26 +7,51 @@
   </header>
 
   @if (!collapsed()) {
-    @let ctx = activeContextChip();
-    @if (ctx) {
-      <div class="context-row">
-        <span class="ctx-label">Context:</span>
-        <span class="ctx-chip">{{ ctx }}</span>
-      </div>
-    }
+    <div class="context-row">
+      <span class="ctx-label">Despre:</span>
+      <select class="ctx-select" (change)="onPickDoc($event)">
+        <option value="">— niciun document —</option>
+        @for (d of allDocs(); track d.id) {
+          <option [value]="d.id" [selected]="d.id === selectedDocId()">{{ d.name }}</option>
+        }
+      </select>
+      @if (parsing()) { <span class="ctx-status">parsing…</span> }
+      @else if (selectedDoc()?.parsed) { <span class="ctx-status ok">✓ parsed</span> }
+    </div>
 
     <div class="messages">
       @if (store.chat().length === 0) {
         <div class="empty">
-          <p>Ask anything about your documents.</p>
-          <p class="hint">Active tab is auto-attached as context.</p>
+          <p>Întreabă orice despre documentul selectat.</p>
+          <p class="hint">Documentul ales de mai sus este atașat ca context.</p>
         </div>
       }
       @for (m of store.chat(); track m.id) {
         <div class="msg" [class.user]="m.role === 'user'" [class.assistant]="m.role === 'assistant'">
           <div class="bubble">
             <div class="role">{{ m.role === 'user' ? '🧑' : '🤖' }}</div>
-            <div class="text">{{ m.text }}</div>
+            @if (m.role === 'assistant') {
+              <div class="text md" [innerHTML]="renderMarkdown(m.text)"></div>
+              @if (m.followups?.length) {
+                <div class="followup-chips">
+                  @for (f of m.followups; track f) {
+                    <button class="followup-chip" (click)="pickFollowup(f)" [disabled]="sending()">
+                      {{ f }}
+                    </button>
+                  }
+                </div>
+              }
+            } @else {
+              <div class="text">{{ m.text }}</div>
+            }
+          </div>
+        </div>
+      }
+      @if (sending()) {
+        <div class="msg assistant">
+          <div class="bubble">
+            <div class="role">🤖</div>
+            <div class="text typing">se gândește…</div>
           </div>
         </div>
       }
@@ -34,18 +59,21 @@
 
     <div class="composer">
       <div class="quick-actions">
-        <button (click)="quickAction('explain')" title="Explain">🔍</button>
-        <button (click)="quickAction('improve')" title="Improve">✨</button>
-        <button (click)="quickAction('summarize')" title="Summarize">📋</button>
+        <button (click)="quickAction('explain')" title="Explică">🔍</button>
+        <button (click)="quickAction('improve')" title="Îmbunătățiri">✨</button>
+        <button (click)="quickAction('summarize')" title="Rezumat">📋</button>
       </div>
       <textarea
         rows="2"
-        placeholder="Ask about the active tab… (Enter to send)"
+        placeholder="Întreabă despre documentul selectat… (Enter trimite)"
         [ngModel]="draft()"
         (ngModelChange)="draft.set($event)"
         (keydown)="onKey($event)"
+        [disabled]="sending()"
       ></textarea>
-      <button class="send" (click)="send()">Send ↵</button>
+      <button class="send" (click)="send()" [disabled]="sending() || !draft().trim()">
+        @if (sending()) { … } @else { Trimite ↵ }
+      </button>
     </div>
   }
 </div>

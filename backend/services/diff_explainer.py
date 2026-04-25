@@ -68,9 +68,45 @@ def explain_diff(diff_response: dict[str, Any]) -> dict[str, Any]:
 
     for block in response.content:
         if getattr(block, "type", None) == "tool_use":
-            return dict(block.input)  # type: ignore[union-attr]
+            return _coerce_explain_payload(dict(block.input))  # type: ignore[union-attr]
 
     raise RuntimeError("Claude did not return a tool_use block for explain_diff.")
+
+
+def _coerce_explain_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    """Defensively normalize Claude's tool_use output.
+
+    Claude occasionally returns ``key_changes`` / ``action_items`` as a single
+    JSON-encoded string (``'["a", "b"]'``) instead of a real list. Pydantic
+    rejects that with ``list_type``. Detect and recover.
+    """
+    import json as _json
+
+    for key in ("key_changes", "action_items"):
+        value = payload.get(key)
+        if isinstance(value, str):
+            stripped = value.strip()
+            if stripped.startswith("[") and stripped.endswith("]"):
+                try:
+                    parsed = _json.loads(stripped)
+                    if isinstance(parsed, list):
+                        payload[key] = [str(x) for x in parsed]
+                        continue
+                except _json.JSONDecodeError:
+                    pass
+            # Last-resort: split on newlines into list items.
+            payload[key] = [
+                line.strip(" -•\t") for line in stripped.splitlines() if line.strip()
+            ]
+        elif value is None:
+            payload[key] = []
+        elif isinstance(value, list):
+            payload[key] = [str(x) for x in value]
+
+    if not isinstance(payload.get("narrative"), str):
+        payload["narrative"] = str(payload.get("narrative") or "")
+
+    return payload
 
 
 _EXPLAIN_TOOL: dict = {
@@ -120,6 +156,17 @@ _EXPLAIN_TOOL: dict = {
 
 
 def _format_diff_for_prompt(diff: dict[str, Any]) -> str:
+    # Prompt budgets — keep the LLM input bounded so adding a 200-entry
+    # bibliography to a diff doesn't blow past Claude's input token limit.
+    MAX_SECTIONS = 20            # at most 20 changed sections in the prompt
+    MAX_LINES_PER_SECTION = 30   # at most 30 emitted lines per section
+    MAX_LINE_CHARS = 240         # truncate any single line beyond this
+    MAX_TOTAL_CHARS = 60_000     # hard ceiling on the whole prompt body
+
+    def _trim(text: str) -> str:
+        text = text.strip()
+        return text if len(text) <= MAX_LINE_CHARS else text[: MAX_LINE_CHARS - 1] + "…"
+
     parts: list[str] = []
 
     summary = diff.get("summary") or {}
@@ -147,21 +194,23 @@ def _format_diff_for_prompt(diff: dict[str, Any]) -> str:
 
     sections = diff.get("sections") or []
     modified_sections = [s for s in sections if s.get("status") in {"modified", "added", "removed"}]
+    truncated_sections = 0
+    if len(modified_sections) > MAX_SECTIONS:
+        truncated_sections = len(modified_sections) - MAX_SECTIONS
+        modified_sections = modified_sections[:MAX_SECTIONS]
     if modified_sections:
         parts.append("\nSECȚIUNI MODIFICATE/ADĂUGATE/ELIMINATE:")
-        for sec in modified_sections[:30]:  # keep prompt bounded
+        for sec in modified_sections:
             name = sec.get("name", "?")
             status = sec.get("status", "?")
             parts.append(f"\n  Secțiune: '{name}' [{status}]")
             # Emit changes with surrounding context lines so the LLM can see
             # table row labels / headers that immediately precede a numeric change.
             all_lines = sec.get("lines") or []
-            # Mark which line indices are changes vs equal
             change_idx = {
                 i for i, ln in enumerate(all_lines)
                 if ln.get("type") in {"remove", "add", "replace"}
             }
-            # Keep equal lines that are within 2 lines of any change (context window)
             keep_idx = set(change_idx)
             for i in change_idx:
                 for j in (i - 2, i - 1, i + 1, i + 2):
@@ -170,15 +219,15 @@ def _format_diff_for_prompt(diff: dict[str, Any]) -> str:
             emitted = 0
             prev_i = -2
             for i in sorted(keep_idx):
-                if emitted >= 60:
+                if emitted >= MAX_LINES_PER_SECTION:
                     parts.append("    ... (restul liniilor omise)")
                     break
                 if i > prev_i + 1:
                     parts.append("    ...")
                 line = all_lines[i]
                 t = line.get("type", "?")
-                old_t = (line.get("old_text") or "").strip()
-                new_t = (line.get("new_text") or "").strip()
+                old_t = _trim(line.get("old_text") or "")
+                new_t = _trim(line.get("new_text") or "")
                 if t == "remove":
                     parts.append(f"    - {old_t}")
                 elif t == "add":
@@ -192,8 +241,15 @@ def _format_diff_for_prompt(diff: dict[str, Any]) -> str:
                         parts.append(f"      {ctx}")
                 prev_i = i
                 emitted += 1
+        if truncated_sections:
+            parts.append(
+                f"\n  ... ({truncated_sections} secțiuni modificate suplimentare omise)"
+            )
 
     if not parts:
         return "Diferența nu conține modificări semnificative."
 
-    return "\n".join(parts)
+    body = "\n".join(parts)
+    if len(body) > MAX_TOTAL_CHARS:
+        body = body[:MAX_TOTAL_CHARS] + "\n... (raport trunchiat — prea multe schimbări)"
+    return body

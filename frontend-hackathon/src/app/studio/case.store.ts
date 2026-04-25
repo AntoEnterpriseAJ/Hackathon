@@ -38,6 +38,8 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   text: string;
+  /** Suggested follow-up questions (assistant messages only). */
+  followups?: string[];
   /** Optional inline actions rendered as buttons next to the message. */
   actions?: ChatAction[];
   contextChips?: string[];

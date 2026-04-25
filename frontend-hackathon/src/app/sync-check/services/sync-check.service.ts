@@ -106,7 +106,7 @@ export class SyncCheckService {
         obiective_generale_ale_disciplinei:                  { required: true,  type: 'string' },
         competente_profesionale:                             { required: true,  type: 'list'   },
         competente_transversale:                             { required: true,  type: 'list'   },
-        bibliografie:                                        { required: false, type: 'string' },
+        bibliografie:                                        { required: false, type: 'list'   },
         semestrul:                                           { required: true,  type: 'number' },
         anul_de_studiu:                                      { required: true,  type: 'number' },
         numar_credite:                                       { required: true,  type: 'number' },

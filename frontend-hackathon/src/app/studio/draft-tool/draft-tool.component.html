@@ -52,9 +52,11 @@
       <ul class="course-list">
         @for (c of cs.courses; track c.course_name) {
           <li (click)="courseName.set(c.course_name)">
-            <strong>{{ c.course_name }}</strong>
-            @if (c.credits) { <span class="muted"> · {{ c.credits }} cr</span> }
-            @if (c.semester) { <span class="muted"> · sem {{ c.semester }}</span> }
+            <strong class="name">{{ c.course_name }}</strong>
+            <span class="meta">
+              @if (c.semester) { <span class="muted">sem {{ c.semester }}</span> }
+              @if (c.credits) { <span class="credits">{{ c.credits }} cr</span> }
+            </span>
           </li>
         }
       </ul>

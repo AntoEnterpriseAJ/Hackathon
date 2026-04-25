@@ -464,13 +464,11 @@ _CHAT_SYSTEM_PROMPT = (
 )
 
 
-def chat(user_message: str, document_contexts: list[dict]) -> str:
+def chat(user_message: str, document_contexts: list[dict]) -> dict:
     """
     Answer a teacher's question, optionally grounded in extracted document data.
 
-    Args:
-        user_message:       The teacher's chat message.
-        document_contexts:  List of previously extracted ParsedDocument dicts.
+    Returns a dict ``{"reply": str, "followups": list[str]}``.
     """
     content_parts: list[dict] = []
 
@@ -507,9 +505,63 @@ def chat(user_message: str, document_contexts: list[dict]) -> str:
         model=_MODEL,
         max_tokens=_MAX_TOKENS,
         system=_CHAT_SYSTEM_PROMPT,
+        tools=[_CHAT_REPLY_TOOL],
+        tool_choice={"type": "tool", "name": "answer_with_followups"},
         messages=[{"role": "user", "content": content_parts}],
     )
-    return response.content[0].text  # type: ignore[union-attr]
+
+    for block in response.content:
+        if getattr(block, "type", None) == "tool_use":
+            payload = dict(block.input)  # type: ignore[union-attr]
+            reply = str(payload.get("reply", "")).strip()
+            raw_followups = payload.get("followups", []) or []
+            followups: list[str] = []
+            if isinstance(raw_followups, list):
+                for item in raw_followups[:3]:
+                    s = str(item).strip()
+                    if s:
+                        followups.append(s)
+            return {"reply": reply, "followups": followups}
+
+    # Fallback: no tool_use returned (shouldn't happen with tool_choice).
+    text = ""
+    for block in response.content:
+        if getattr(block, "type", None) == "text":
+            text = block.text  # type: ignore[union-attr]
+            break
+    return {"reply": text, "followups": []}
+
+
+_CHAT_REPLY_TOOL: dict = {
+    "name": "answer_with_followups",
+    "description": (
+        "Answer the user's question and propose 2-3 short, document-specific "
+        "follow-up questions the user might naturally ask next."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "reply": {
+                "type": "string",
+                "description": (
+                    "The full answer to the user's question. Markdown allowed "
+                    "(bold, lists, code). Concise and grounded in the provided "
+                    "document context. Romanian if the user wrote in Romanian."
+                ),
+            },
+            "followups": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": (
+                    "2-3 short follow-up questions (sub 60 caractere fiecare) "
+                    "specifice documentului discutat. Limba urmează limba "
+                    "răspunsului. Fără ghilimele, fără numerotare."
+                ),
+            },
+        },
+        "required": ["reply", "followups"],
+    },
+}
 
 
 def generate_template_suggestions(

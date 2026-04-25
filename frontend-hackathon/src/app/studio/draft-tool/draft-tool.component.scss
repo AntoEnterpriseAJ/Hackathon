@@ -59,6 +59,16 @@
 .bad { color: #b91c1c; }
 
 .course-list { list-style: none; padding: 0; margin: 0; max-height: 240px; overflow: auto; }
-.course-list li { cursor: pointer; padding: 6px 8px; border-radius: 4px; display: flex; justify-content: space-between; gap: 8px; }
+.course-list li {
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
 .course-list li:hover { background: #eef2ff; }
-.course-list .meta { color: #6b7280; font-size: 12px; }
+.course-list .name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.course-list .meta { flex: 0 0 auto; display: inline-flex; align-items: baseline; gap: 10px; color: #6b7280; font-size: 12px; white-space: nowrap; }
+.course-list .meta .credits { font-variant-numeric: tabular-nums; min-width: 3.5em; text-align: right; color: #374151; font-weight: 500; }
