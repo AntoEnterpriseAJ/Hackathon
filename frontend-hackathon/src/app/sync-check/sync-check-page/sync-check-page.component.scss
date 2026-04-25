@@ -1,0 +1,454 @@
+.sync-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+
+  h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    color: #555;
+    margin: 0;
+  }
+}
+
+.upload-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.upload-card {
+  background: #f8f9fa;
+  border: 1px dashed #cdd3d8;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .upload-label {
+    font-weight: 600;
+  }
+
+  input[type='file'] {
+    font-size: 0.9rem;
+  }
+
+  .filename {
+    color: #2a7;
+    font-style: italic;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.btn-primary {
+    background: #2563eb;
+    color: white;
+  }
+
+  &.btn-secondary {
+    background: #e5e7eb;
+    color: #111;
+  }
+
+  &.btn-tertiary {
+    background: #ecfeff;
+    color: #155e75;
+    border: 1px solid #a5f3fc;
+  }
+}
+
+.error-box {
+  background: #fee;
+  border-left: 4px solid #c33;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.result-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  &.badge-valid { background: #d1fae5; color: #065f46; }
+  &.badge-invalid { background: #fee2e2; color: #991b1b; }
+  &.badge-warning { background: #fef3c7; color: #92400e; }
+  &.badge-neutral { background: #e5e7eb; color: #374151; }
+}
+
+.summary {
+  white-space: pre-line;
+  background: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border-left: 3px solid #cbd5e1;
+  margin: 1rem 0;
+}
+
+.match-card {
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+
+  h4 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.25rem 1rem;
+    margin: 0;
+
+    dt {
+      font-weight: 600;
+      color: #555;
+    }
+
+    dd {
+      margin: 0;
+    }
+  }
+}
+
+.violation-group {
+  margin: 1rem 0;
+
+  h4 {
+    margin: 0 0 0.5rem;
+    color: #991b1b;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.25rem;
+
+    li {
+      margin-bottom: 0.4rem;
+      line-height: 1.4;
+    }
+  }
+
+  .codes {
+    color: #6b7280;
+    font-style: italic;
+  }
+}
+
+.success-box {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+.route-badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  background: #eef2ff;
+  color: #3730a3;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.route-info {
+  margin: 0 0 1rem;
+  color: #555;
+}
+
+.coverage-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.coverage-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .coverage-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+}
+
+.btn-sm {
+  padding: 0.35rem 0.75rem !important;
+  font-size: 0.85rem !important;
+}
+
+.coverage-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+
+  th, td {
+    padding: 0.5rem 0.6rem;
+    text-align: left;
+    border-bottom: 1px solid #f0f1f3;
+  }
+
+  th {
+    background: #f9fafb;
+    color: #374151;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  tbody tr {
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:hover {
+      background: #f8fafc;
+    }
+
+    &.selected {
+      background: #eef2ff;
+
+      td {
+        font-weight: 600;
+      }
+    }
+  }
+
+  .col-num { width: 3rem; color: #6b7280; }
+  .col-pages { width: 6rem; color: #6b7280; font-variant-numeric: tabular-nums; }
+  .col-status { width: 8rem; }
+  .col-violations { width: 6rem; text-align: center; font-variant-numeric: tabular-nums; }
+}
+
+.competency-section {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #d0d7e2;
+  border-radius: 6px;
+  background: #fafbfd;
+
+  h4 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+  }
+
+  .competency-summary {
+    margin: 0 0 0.75rem;
+    color: #334155;
+  }
+
+  &.pending,
+  &.error {
+    background: #f6f7f9;
+  }
+
+  .muted {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+.numeric-issues,
+.bibliography-entries {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  .issue {
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    padding: 0.45rem 0.65rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+  }
+  .issue-error { background: #fef2f2; border-color: #fca5a5; color: #7f1d1d; }
+  .issue-warning { background: #fffbeb; border-color: #fcd34d; color: #78350f; }
+  .issue-info { background: #eff6ff; border-color: #bfdbfe; color: #1e3a8a; }
+  .issue-ok { background: #f0fdf4; border-color: #bbf7d0; color: #14532d; }
+}
+
+.bibliography-entries .biblio-year {
+  flex: 0 0 6.5rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.bibliography-entries .biblio-text { flex: 1; }
+.bibliography-entries .biblio-urls a {
+  margin-left: 0.4rem;
+  text-decoration: none;
+}
+
+.competency-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.competency-block {
+  border-radius: 5px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid transparent;
+
+  h5 {
+    margin: 0 0 0.4rem;
+    font-size: 0.92rem;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    li { margin-bottom: 0.25rem; line-height: 1.35; }
+  }
+
+  &.declared {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+  }
+
+  &.unknown {
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
+
+  &.recommended {
+    background: #fefce8;
+    border-color: #fde68a;
+
+    .rationale {
+      font-size: 0.85rem;
+      color: #475569;
+      margin-top: 0.15rem;
+    }
+
+    .confidence {
+      display: inline-block;
+      margin-top: 0.2rem;
+      font-size: 0.75rem;
+      background: #fbbf24;
+      color: #1f2937;
+      border-radius: 3px;
+      padding: 0.05rem 0.4rem;
+    }
+  }
+
+  &.plan-only {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    ul { margin-top: 0.5rem; }
+  }
+}
+
+.numeric-issues, .bibliography-entries {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  .issue {
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+    padding: 0.45rem 0.65rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+  }
+  .issue-error { background: #fef2f2; border-color: #fca5a5; color: #7f1d1d; }
+  .issue-warning { background: #fffbeb; border-color: #fcd34d; color: #78350f; }
+  .issue-info { background: #eff6ff; border-color: #bfdbfe; color: #1e3a8a; }
+  .issue-ok { background: #f0fdf4; border-color: #bbf7d0; color: #14532d; }
+}
+
+.bibliography-entries .biblio-year {
+  flex: 0 0 6.5rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.bibliography-entries .biblio-text { flex: 1; }
+.bibliography-entries .biblio-urls a {
+  margin-left: 0.4rem;
+  text-decoration: none;
+}

@@ -1,0 +1,336 @@
+<div class="sync-page">
+  <header class="page-header">
+    <h2>🔗 Sync Check — Fișa Disciplinei vs. Plan de Învățământ</h2>
+    <p class="subtitle">
+      Verifică dacă o Fișă a Disciplinei este aliniată cu Planul de Învățământ
+      (denumire, credite, formă de evaluare, competențe profesionale și transversale).
+    </p>
+  </header>
+
+  <section class="upload-section">
+    <div class="upload-card">
+      <label class="upload-label" for="fd-input">
+        📄 Fișa Disciplinei (PDF / imagine)
+      </label>
+      <input id="fd-input" type="file" accept="application/pdf,image/*" (change)="onFdSelected($event)" />
+      @if (fdFile()) {
+        <small class="filename">{{ fdFile()?.name }}</small>
+      }
+    </div>
+
+    <div class="upload-card">
+      <label class="upload-label" for="plan-input">
+        📋 Plan de Învățământ (PDF / imagine)
+      </label>
+      <input id="plan-input" type="file" accept="application/pdf,image/*" (change)="onPlanSelected($event)" />
+      @if (planFile()) {
+        <small class="filename">{{ planFile()?.name }}</small>
+      }
+    </div>
+  </section>
+
+  <section class="actions">
+    <button class="btn btn-primary" [disabled]="!canRun()" (click)="run()">
+      @switch (status()) {
+        @case ('splitting') { Împărțire bundle… }
+        @case ('parsing') { Procesare PDF-uri… }
+        @case ('validating') {
+          Validare… ({{ progressDone() }} / {{ progressTotal() }})
+        }
+        @default { ▶ Rulează validarea }
+      }
+    </button>
+    <button class="btn btn-secondary" (click)="reset()" [disabled]="status() === 'splitting' || status() === 'parsing' || status() === 'validating'">
+      Resetează
+    </button>
+    @if (canDownloadReport()) {
+      <button class="btn btn-tertiary" (click)="downloadReport()">
+        ⬇ Descarcă raport (.txt)
+      </button>
+    }
+  </section>
+
+  @if (status() === 'error') {
+    <div class="error-box">
+      <strong>Eroare:</strong> {{ errorMessage() }}
+    </div>
+  }
+
+  @if (isBundle() && bundleSlices().length > 0) {
+    <section class="coverage-section">
+      <div class="coverage-header">
+        <h3>📦 Bundle: {{ bundleSlices().length }} discipline detectate</h3>
+        <div class="coverage-header-right">
+          @if (planRoute()) {
+            <small>Plan: <span class="route-badge">{{ routeLabel(planRoute()) }}</span></small>
+          }
+          @if (canDownloadReport()) {
+            <button class="btn btn-tertiary btn-sm" (click)="downloadReport()">
+              ⬇ Descarcă raport (.txt)
+            </button>
+          }
+        </div>
+      </div>
+      <table class="coverage-table">
+        <thead>
+          <tr>
+            <th class="col-num">#</th>
+            <th class="col-name">Disciplină</th>
+            <th class="col-pages">Pagini</th>
+            <th class="col-status">Status</th>
+            <th class="col-violations">Inconsistențe</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (slice of bundleSlices(); track slice.index) {
+            <tr
+              [class.selected]="selectedSliceIndex() === slice.index"
+              (click)="selectSlice(slice.index)"
+            >
+              <td class="col-num">{{ slice.index }}</td>
+              <td class="col-name">{{ rowCourseName(slice) }}</td>
+              <td class="col-pages">{{ slice.page_start }}–{{ slice.page_end }}</td>
+              <td class="col-status">
+                <span class="badge" [class]="sliceRowBadge(slice.index).className">
+                  {{ sliceRowBadge(slice.index).label }}
+                </span>
+              </td>
+              <td class="col-violations">
+                @if (sliceRuns().get(slice.index)?.status === 'done') {
+                  {{ violationCount(slice.index) }}
+                } @else {
+                  —
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+
+  @if (selectedRunError(); as sliceErr) {
+    <div class="error-box">
+      <strong>Eroare la disciplina selectată:</strong> {{ sliceErr }}
+    </div>
+  }
+
+  @if (result(); as r) {
+    <section class="result-section">
+      <div class="result-header">
+        <span class="badge" [class]="statusBadge().className">{{ statusBadge().label }}</span>
+        <h3>{{ r.fd_course_name || 'Disciplină necunoscută' }}</h3>
+      </div>
+
+      @if (fdRoute() || planRoute()) {
+        <p class="route-info">
+          <small>
+            FD: <span class="route-badge">{{ routeLabel(fdRoute()) }}</span>
+            &nbsp;·&nbsp;
+            Plan: <span class="route-badge">{{ routeLabel(planRoute()) }}</span>
+          </small>
+        </p>
+      }
+
+      <p class="summary">{{ r.summary }}</p>
+
+      @if (r.plan_match; as match) {
+        <div class="match-card">
+          <h4>Potrivire în Plan</h4>
+          <dl>
+            <dt>Denumire în plan</dt><dd>{{ match.course_name }}</dd>
+            @if (match.course_code) {
+              <dt>Cod disciplină</dt><dd>{{ match.course_code }}</dd>
+            }
+            @if (match.year) {
+              <dt>An / Semestru</dt><dd>{{ match.year }} / {{ match.semester || '—' }}</dd>
+            }
+            @if (match.credits != null) {
+              <dt>Credite (Plan)</dt><dd>{{ match.credits }}</dd>
+            }
+            @if (match.evaluation_form) {
+              <dt>Evaluare (Plan)</dt><dd>{{ match.evaluation_form }}</dd>
+            }
+            <dt>Tip potrivire</dt><dd>{{ match.match_confidence }}</dd>
+          </dl>
+        </div>
+      }
+
+      @if (r.field_violations.length > 0) {
+        <div class="violation-group">
+          <h4>⚠ Inconsistențe administrative</h4>
+          <ul>
+            @for (v of r.field_violations; track v.code) {
+              <li>
+                <strong>[{{ v.code }}]</strong> {{ v.message }}
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (r.competency_violations.length > 0) {
+        <div class="violation-group">
+          <h4>⚠ Competențe nealiniate</h4>
+          <ul>
+            @for (v of r.competency_violations; track v.code) {
+              <li>
+                <strong>[{{ v.code }}]</strong> {{ v.message }}
+                @if (v.fields && v.fields.length > 0) {
+                  <span class="codes">({{ v.fields.join(', ') }})</span>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (r.field_violations.length === 0 && r.competency_violations.length === 0 && r.status === 'valid') {
+        <div class="success-box">
+          ✅ Toate verificările au trecut. FD este aliniată cu Planul de Învățământ.
+        </div>
+      }
+
+      @if (competencyMapping(); as cm) {
+        <div class="competency-section">
+          <h4>🎯 Hartă competențe (FD ↔ Plan)</h4>
+          <p class="competency-summary">{{ cm.summary }}</p>
+
+          <div class="competency-grid">
+            <div class="competency-block declared">
+              <h5>✅ Declarate corect ({{ cm.declared.length }})</h5>
+              @if (cm.declared.length > 0) {
+                <ul>
+                  @for (c of cm.declared; track c.code) {
+                    <li><strong>{{ c.code }}</strong> — {{ c.title }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="muted">Nicio competență declarată regăsită în catalog.</p>
+              }
+            </div>
+
+            @if (cm.unknown.length > 0) {
+              <div class="competency-block unknown">
+                <h5>⚠ Necunoscute în Plan ({{ cm.unknown.length }})</h5>
+                <ul>
+                  @for (c of cm.unknown; track c.code) {
+                    <li><strong>{{ c.code }}</strong> — codul nu există în catalogul Planului</li>
+                  }
+                </ul>
+              </div>
+            }
+
+            @if (cm.recommended.length > 0) {
+              <div class="competency-block recommended">
+                <h5>💡 Sugerate de AI ({{ cm.recommended.length }})</h5>
+                <ul>
+                  @for (c of cm.recommended; track c.code) {
+                    <li>
+                      <strong>{{ c.code }}</strong> — {{ c.title }}
+                      <div class="rationale">{{ c.rationale }}</div>
+                      <span class="confidence">încredere: {{ c.confidence }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+
+            @if (cm.plan_only.length > 0) {
+              <details class="competency-block plan-only">
+                <summary>📋 Disponibile în Plan, nedeclarate ({{ cm.plan_only.length }})</summary>
+                <ul>
+                  @for (c of cm.plan_only; track c.code) {
+                    <li><strong>{{ c.code }}</strong> — {{ c.title }}</li>
+                  }
+                </ul>
+              </details>
+            }
+          </div>
+        </div>
+      } @else if (competencyError()) {
+        <div class="competency-section error">
+          <h4>🎯 Hartă competențe</h4>
+          <p class="muted">Maparea competențelor nu a putut fi calculată: {{ competencyError() }}</p>
+        </div>
+      } @else if (result()) {
+        <div class="competency-section pending">
+          <h4>🎯 Hartă competențe</h4>
+          <p class="muted">Se calculează maparea competențelor…</p>
+        </div>
+      }
+
+      @if (numericReport(); as nr) {
+        <div class="competency-section">
+          <h4>🔢 Consistență numerică (UC 1.2)</h4>
+          <p class="competency-summary">{{ nr.summary }}</p>
+          @if (nr.issues.length > 0) {
+            <ul class="numeric-issues">
+              @for (i of nr.issues; track i.code) {
+                <li [class]="'issue issue-' + i.severity">
+                  <strong>{{ i.severity === 'error' ? '⛔' : '⚠️' }} {{ i.code }}</strong>
+                  <span>{{ i.message }}</span>
+                </li>
+              }
+            </ul>
+          } @else if (nr.total_checks > 0) {
+            <p class="muted">Toate verificările numerice au trecut.</p>
+          }
+        </div>
+      } @else if (numericError()) {
+        <div class="competency-section error">
+          <h4>🔢 Consistență numerică</h4>
+          <p class="muted">Verificarea nu a putut rula: {{ numericError() }}</p>
+        </div>
+      } @else if (result()) {
+        <div class="competency-section pending">
+          <h4>🔢 Consistență numerică</h4>
+          <p class="muted">Se verifică consistența numerică…</p>
+        </div>
+      }
+
+      @if (bibliographyReport(); as br) {
+        <div class="competency-section">
+          <h4>📚 Bibliografie (UC 3.1)</h4>
+          <p class="competency-summary">{{ br.summary }}</p>
+          @if (br.entries.length > 0) {
+            <ul class="bibliography-entries">
+              @for (e of br.entries; track e.section_index + '-' + e.entry_index) {
+                <li [class]="e.issues.length > 0 ? 'issue issue-warning' : 'issue issue-ok'">
+                  <span class="biblio-year">
+                    @if (e.latest_year !== null) {
+                      {{ e.latest_year }}
+                      @if (e.age_years !== null) {
+                        <span class="muted">({{ e.age_years }} ani)</span>
+                      }
+                    } @else {
+                      <span class="muted">fără an</span>
+                    }
+                  </span>
+                  <span class="biblio-text">{{ e.text }}</span>
+                  @if (e.urls.length > 0) {
+                    <span class="biblio-urls">
+                      @for (u of e.urls; track u) {
+                        <a [href]="u" target="_blank" rel="noopener">🔗</a>
+                      }
+                    </span>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      } @else if (bibliographyError()) {
+        <div class="competency-section error">
+          <h4>📚 Bibliografie</h4>
+          <p class="muted">Verificarea nu a putut rula: {{ bibliographyError() }}</p>
+        </div>
+      } @else if (result()) {
+        <div class="competency-section pending">
+          <h4>📚 Bibliografie</h4>
+          <p class="muted">Se verifică bibliografia…</p>
+        </div>
+      }
+    </section>
+  }
+</div>

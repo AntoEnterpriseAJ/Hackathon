@@ -12,6 +12,16 @@ export const routes: Routes = [
     component: DiffPageComponent
   },
   {
+    path: 'sync',
+    loadComponent: () =>
+      import('./sync-check/sync-check-page/sync-check-page.component').then((m) => m.SyncCheckPageComponent)
+  },
+  {
+    path: 'draft',
+    loadComponent: () =>
+      import('./draft/draft-page/draft-page.component').then((m) => m.DraftPageComponent)
+  },
+  {
     path: '**',
     redirectTo: ''
   }
