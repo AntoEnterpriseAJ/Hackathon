@@ -1,6 +1,10 @@
 import re
 import traceback
 import unicodedata
+import base64
+import io
+import json
+import os
 from urllib.parse import quote
 from typing import Any
 
@@ -37,6 +41,14 @@ from services.parse_cache import parse_cache
 from services.pi_fast_parser import parse_pi as fast_parse_pi
 from services.template_suggester import suggest_template_fixes
 from services.template_validator import validate_template
+from services.docx_section_extractor import extract_sections as extract_docx_sections
+from services.template_filler import fill_template
+from services.template_section_mapper import map_sections
+from schemas.template_shift import (
+    AdminUpdateReport,
+    SectionMatchReport,
+    ShiftReport,
+)
 
 router = APIRouter()
 
@@ -567,4 +579,129 @@ async def split_fd_bundle_endpoint(file: UploadFile = File(...)) -> SplitFdBundl
             )
             for s in slices
         ],
+    )
+
+# (template-shifter endpoint appended below)
+
+
+def _claude_complete_text(prompt: str) -> str:
+    """Plain text completion via Claude. Used by the template-shift mapper."""
+    from services import claude_service as _cs
+
+    response = _cs._get_client().messages.create(  # type: ignore[attr-defined]
+        model=getattr(_cs, "_MODEL", "claude-sonnet-4-5"),
+        max_tokens=getattr(_cs, "_MAX_TOKENS", 4096),
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.content[0].text  # type: ignore[union-attr]
+
+
+def _claude_is_configured() -> bool:
+    return bool(os.environ.get("ANTHROPIC_API_KEY", "").strip())
+
+
+@router.post("/shift-template")
+async def shift_template_endpoint(
+    old_fd: UploadFile = File(...),
+    new_template: UploadFile = File(...),
+    plan: UploadFile | None = File(None),
+) -> StreamingResponse:
+    old_bytes = await old_fd.read()
+    new_bytes = await new_template.read()
+
+    try:
+        old_sections = extract_docx_sections(old_bytes)
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Invalid old FD docx: {exc}") from exc
+    try:
+        new_sections = extract_docx_sections(new_bytes)
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Invalid template docx: {exc}") from exc
+
+    if not old_sections or not new_sections:
+        raise HTTPException(status_code=422, detail="No sections detected; check headings")
+
+    plan_meta: dict = {}
+    if plan is not None:
+        try:
+            pdf_bytes = await plan.read()
+            parsed = fast_parse_pi(pdf_bytes)
+            plan_meta = parsed if isinstance(parsed, dict) else {}
+        except Exception:
+            traceback.print_exc()
+            plan_meta = {}
+
+    claude_callable = _claude_complete_text if _claude_is_configured() else None
+    matches = map_sections(old_sections, new_sections, claude=claude_callable)
+
+    filled_bytes = fill_template(
+        template_bytes=new_bytes,
+        old_sections=old_sections,
+        new_sections=new_sections,
+        matches=matches,
+        plan_meta=plan_meta,
+    )
+
+    report = _build_shift_report(
+        old_sections, new_sections, matches, plan_meta, claude_callable is not None
+    )
+    encoded = base64.b64encode(
+        json.dumps(report.model_dump(), ensure_ascii=False).encode("utf-8")
+    ).decode("ascii")
+
+    headers = {
+        "Content-Disposition": 'attachment; filename="fisa_disciplinei_migrated.docx"',
+        "X-Shift-Report": encoded,
+    }
+    return StreamingResponse(
+        io.BytesIO(filled_bytes),
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers=headers,
+    )
+
+
+def _build_shift_report(
+    old_sections, new_sections, matches, plan_meta, llm_available: bool
+) -> ShiftReport:
+    new_by_id = {s.id: s for s in new_sections}
+    old_by_id = {s.id: s for s in old_sections}
+
+    match_reports: list[SectionMatchReport] = []
+    placeholders: list[str] = []
+    for m in matches:
+        new_sec = new_by_id.get(m.new_section_id)
+        old_sec = old_by_id.get(m.old_section_id) if m.old_section_id else None
+        new_heading = new_sec.heading if new_sec else m.new_section_id
+        match_reports.append(
+            SectionMatchReport(
+                new_heading=new_heading,
+                old_heading=old_sec.heading if old_sec else None,
+                confidence=m.confidence,
+                rationale=m.rationale,
+            )
+        )
+        if m.confidence == "placeholder":
+            placeholders.append(new_heading)
+
+    admin_keys = {
+        "decanul_facultatii",
+        "directorul_de_departament",
+        "programul_de_studii",
+        "facultatea",
+        "domeniul_de_licenta",
+        "coordonator_program_studii",
+        "rector",
+    }
+    admin_updates = [
+        AdminUpdateReport(field=k, value=str(v))
+        for k, v in (plan_meta or {}).items()
+        if k in admin_keys and v
+    ]
+
+    return ShiftReport(
+        matches=match_reports,
+        admin_updates=admin_updates,
+        placeholders=placeholders,
+        llm_used=llm_available
+        and any(m.confidence.startswith("llm-") for m in matches),
     )

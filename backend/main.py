@@ -16,6 +16,7 @@ app.add_middleware(
     allow_origins=["http://localhost:4200"],
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Shift-Report"],
 )
 
 app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
