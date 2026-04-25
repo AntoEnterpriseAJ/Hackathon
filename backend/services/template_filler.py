@@ -72,9 +72,19 @@ def fill_template(
             else _build_placeholder_elements(doc)
         )
 
-        anchor = (
-            children[end] if end < len(children) else None
-        )
+        # Skip body-level metadata (e.g. trailing <w:sectPr>) — only paragraphs
+        # and tables are real content slots that we may rewrite.
+        content_tags = {qn("w:p"), qn("w:tbl")}
+        slot_children = [c for c in slot_children if c.tag in content_tags]
+
+        # Anchor on the next non-content sibling if the slot ends at body end,
+        # so re-inserted elements land before any trailing <w:sectPr>.
+        if end < len(children):
+            anchor = children[end]
+        else:
+            trailing = [c for c in children[start:] if c.tag not in content_tags]
+            anchor = trailing[0] if trailing else None
+
         # Remove existing slot children.
         for stale in slot_children:
             body.remove(stale)
