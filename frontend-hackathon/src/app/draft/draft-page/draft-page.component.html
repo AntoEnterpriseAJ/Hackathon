@@ -1,0 +1,189 @@
+<div class="draft-page">
+  <header class="page-header">
+    <h2>📝 FD Drafter — generează o Fișă a Disciplinei din Plan</h2>
+    <p class="subtitle">
+      Încarcă un Plan de Învățământ, alege o disciplină și obține un schelet
+      de Fișă a Disciplinei pre-completat cu datele administrative din Plan.
+      Activează AI pentru a genera și conținutul narativ (obiective, conținut, bibliografie).
+    </p>
+  </header>
+
+  <section class="upload-section">
+    <div class="upload-card">
+      <label class="upload-label" for="plan-input">📋 Plan de Învățământ (PDF)</label>
+      <input id="plan-input" type="file" accept="application/pdf,image/*" (change)="onPlanSelected($event)" />
+      @if (planFile()) {
+        <small class="filename">{{ planFile()?.name }}</small>
+      }
+    </div>
+    <div class="actions-inline">
+      <button class="btn btn-primary" [disabled]="!canParse()" (click)="loadPlan()">
+        @switch (status()) {
+          @case ('parsing') { Procesare PDF… }
+          @case ('listing') { Listare discipline… }
+          @default { ▶ Încarcă Planul }
+        }
+      </button>
+      <button class="btn btn-secondary" (click)="reset()" [disabled]="status() === 'parsing' || status() === 'drafting'">
+        Resetează
+      </button>
+    </div>
+  </section>
+
+  @if (status() === 'error') {
+    <div class="error-box"><strong>Eroare:</strong> {{ errorMessage() }}</div>
+  }
+
+  @if (courses().length > 0) {
+    <section class="courses-section">
+      <div class="courses-header">
+        <h3>📚 Discipline din Plan ({{ filteredCourses().length }} / {{ courses().length }})</h3>
+        @if (programName()) {
+          <small>Program: <strong>{{ programName() }}</strong></small>
+        }
+      </div>
+
+      <div class="filters">
+        <input
+          type="text"
+          placeholder="🔍 Caută după nume sau cod…"
+          [ngModel]="filterText()"
+          (ngModelChange)="filterText.set($event)"
+        />
+        <select [ngModel]="filterYear()" (ngModelChange)="filterYear.set($event === '' ? null : +$event)">
+          <option [ngValue]="null">Toți anii</option>
+          @for (y of availableYears(); track y) {
+            <option [ngValue]="y">An {{ y }}</option>
+          }
+        </select>
+      </div>
+
+      <table class="courses-table">
+        <thead>
+          <tr>
+            <th>Disciplină</th>
+            <th>Cod</th>
+            <th>An / Sem</th>
+            <th>Credite</th>
+            <th>Eval</th>
+            <th>Categ</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of filteredCourses(); track c.course_name + (c.course_code || '') + (c.year || '') + (c.semester || '')) {
+            <tr
+              [class.selected]="selectedCourse() === c"
+              (click)="selectCourse(c)"
+            >
+              <td>{{ c.course_name }}</td>
+              <td>{{ c.course_code || '—' }}</td>
+              <td>{{ c.year || '—' }} / {{ c.semester || '—' }}</td>
+              <td>{{ c.credits ?? '—' }}</td>
+              <td>{{ c.evaluation_form || '—' }}</td>
+              <td>{{ c.categoria_formativa || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (selectedCourse(); as sel) {
+        <div class="generate-bar">
+          <div class="selected-info">
+            Selectată: <strong>{{ sel.course_name }}</strong>
+            @if (sel.course_code) { <span class="code">[{{ sel.course_code }}]</span> }
+          </div>
+          <label class="ai-toggle">
+            <input type="checkbox" [checked]="useClaude()" (change)="useClaude.set($any($event.target).checked)" />
+            🤖 Folosește AI pentru conținut narativ
+          </label>
+          <button class="btn btn-primary" [disabled]="!canDraft()" (click)="generate()">
+            @if (status() === 'drafting') { Generare… } @else { ✨ Generează draft FD }
+          </button>
+        </div>
+      }
+    </section>
+  }
+
+  @if (draft(); as d) {
+    <section class="draft-result">
+      <div class="draft-header">
+        <h3>📄 Draft FD: {{ d.course_name }}</h3>
+        <div class="draft-actions">
+          @if (d.ai_generated) {
+            <span class="badge ai">🤖 Conținut generat de AI</span>
+          } @else {
+            <span class="badge baseline">📋 Doar schelet (fără AI)</span>
+          }
+          <button class="btn btn-tertiary" (click)="download()">⬇ Descarcă .md</button>
+          <button class="btn btn-primary" (click)="downloadDocx()" [disabled]="status() === 'drafting'">
+            @if (status() === 'drafting') { Generare .docx… } @else { 📥 Descarcă .docx (UTCN) }
+          </button>
+        </div>
+      </div>
+      <p class="draft-summary">{{ d.summary }}</p>
+
+      @if (d.picker_fallback_reason) {
+        <div class="picker-fallback">⚠ {{ d.picker_fallback_reason }}</div>
+      }
+
+      <div class="admin-grid">
+        @if (d.course_code) { <div><strong>Cod:</strong> {{ d.course_code }}</div> }
+        @if (d.year) { <div><strong>An:</strong> {{ d.year }}</div> }
+        @if (d.semester) { <div><strong>Semestru:</strong> {{ d.semester }}</div> }
+        @if (d.credits != null) { <div><strong>Credite:</strong> {{ d.credits }}</div> }
+        @if (d.evaluation_form) { <div><strong>Evaluare:</strong> {{ d.evaluation_form }}</div> }
+        @if (d.categoria_formativa) { <div><strong>Categorie:</strong> {{ d.categoria_formativa }}</div> }
+        @if (d.total_hours != null) { <div><strong>Ore total:</strong> {{ d.total_hours }}</div> }
+        @if (d.weekly_hours) { <div><strong>Ore/săpt:</strong> {{ d.weekly_hours }}</div> }
+      </div>
+
+      @if (d.selected_cp.length > 0 || d.selected_ct.length > 0) {
+        <div class="picked-block">
+          <h4>🎯 Competențe selectate pentru această disciplină</h4>
+          @for (cp of d.selected_cp; track cp.code) {
+            <article class="competency-card cp">
+              <header><strong>{{ cp.code }}</strong> — {{ cp.title }}</header>
+              @if (cp.rationale) { <p class="rationale"><em>Motivație AI:</em> {{ cp.rationale }}</p> }
+              @if (cp.ri_bullets.length > 0) {
+                <ul>
+                  @for (b of cp.ri_bullets; track b) { <li>{{ b }}</li> }
+                </ul>
+              }
+            </article>
+          }
+          @for (ct of d.selected_ct; track ct.code) {
+            <article class="competency-card ct">
+              <header><strong>{{ ct.code }}</strong> — {{ ct.title }}</header>
+              @if (ct.rationale) { <p class="rationale"><em>Motivație AI:</em> {{ ct.rationale }}</p> }
+              @if (ct.ri_bullets.length > 0) {
+                <ul>
+                  @for (b of ct.ri_bullets; track b) { <li>{{ b }}</li> }
+                </ul>
+              }
+            </article>
+          }
+        </div>
+      }
+
+      @if (d.competencies.length > 0) {
+        <details class="competencies">
+          <summary>📚 Tot catalogul de competențe din Plan ({{ d.competencies.length }})</summary>
+          <ul>
+            @for (c of d.competencies; track c) {
+              <li>{{ c }}</li>
+            }
+          </ul>
+        </details>
+      }
+
+      <div class="sections">
+        @for (s of d.sections; track s.title) {
+          <article class="section-card">
+            <h4>{{ s.title }}</h4>
+            <pre class="section-body">{{ s.body }}</pre>
+          </article>
+        }
+      </div>
+    </section>
+  }
+</div>
