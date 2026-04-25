@@ -1,0 +1,54 @@
+<section class="template-shift">
+  <header>
+    <h2>🔄 Template Shifter</h2>
+    <p>Migrate an old Fișa Disciplinei into the structure of a new template.</p>
+  </header>
+
+  <div class="uploaders">
+    <label>
+      <span>Old FD (.docx)</span>
+      <input type="file" accept=".docx" (change)="pickFile('oldFd', $event)" />
+    </label>
+    <label>
+      <span>New template (.docx)</span>
+      <input type="file" accept=".docx" (change)="pickFile('template', $event)" />
+    </label>
+    <label>
+      <span>Plan de Învățământ (.pdf, optional)</span>
+      <input type="file" accept=".pdf" (change)="pickFile('plan', $event)" />
+    </label>
+  </div>
+
+  <button type="button" [disabled]="!canMigrate()" (click)="migrate()">
+    {{ loading() ? 'Migrating…' : 'Migrate' }}
+  </button>
+
+  <p class="error" *ngIf="errorMessage() as msg">{{ msg }}</p>
+
+  <ng-container *ngIf="report() as r">
+    <div class="download" *ngIf="downloadUrl() as url">
+      <a [href]="url" [download]="downloadName()">⬇ Download migrated FD</a>
+    </div>
+
+    <section class="results">
+      <h3>Mapping report</h3>
+      <p class="meta">LLM used: {{ r.llm_used ? 'yes' : 'no' }}</p>
+      <div class="group" *ngFor="let group of groupedMatches()">
+        <h4>{{ group.label }} ({{ group.entries.length }})</h4>
+        <ul>
+          <li *ngFor="let m of group.entries">
+            <strong>{{ m.new_heading }}</strong>
+            <ng-container *ngIf="m.old_heading"> ← {{ m.old_heading }}</ng-container>
+            <em *ngIf="m.rationale"> — {{ m.rationale }}</em>
+          </li>
+        </ul>
+      </div>
+      <div class="group" *ngIf="r.admin_updates.length">
+        <h4>Admin auto-fill ({{ r.admin_updates.length }})</h4>
+        <ul>
+          <li *ngFor="let u of r.admin_updates"><strong>{{ u.field }}:</strong> {{ u.value }}</li>
+        </ul>
+      </div>
+    </section>
+  </ng-container>
+</section>

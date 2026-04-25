@@ -22,6 +22,13 @@ export const routes: Routes = [
       import('./draft/draft-page/draft-page.component').then((m) => m.DraftPageComponent)
   },
   {
+    path: 'template-shift',
+    loadComponent: () =>
+      import('./template-shift/template-shift-page/template-shift-page.component').then(
+        (m) => m.TemplateShiftPageComponent,
+      )
+  },
+  {
     path: '**',
     redirectTo: ''
   }

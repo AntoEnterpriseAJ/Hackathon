@@ -1,0 +1,58 @@
+.template-shift {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  font-family: system-ui, sans-serif;
+
+  header h2 { margin-bottom: 0.25rem; }
+  header p { color: #555; margin-top: 0; }
+
+  .uploaders {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      padding: 0.75rem;
+      border: 1px dashed #b8c4d4;
+      border-radius: 6px;
+      background: #f9fbfd;
+      span { font-weight: 600; }
+    }
+  }
+
+  button {
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    border: 0;
+    background: #1f6feb;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+
+  .error { color: #b91c1c; margin-top: 1rem; }
+
+  .download { margin: 1.25rem 0; }
+  .download a {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #16a34a;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  .results { margin-top: 1.5rem; }
+  .results .meta { color: #666; }
+  .results .group { margin-top: 1rem; }
+  .results .group h4 { margin-bottom: 0.4rem; }
+  .results .group ul { margin: 0; padding-left: 1.25rem; }
+  .results .group li { margin: 0.2rem 0; }
+}
