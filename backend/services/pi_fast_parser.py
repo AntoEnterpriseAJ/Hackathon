@@ -85,6 +85,11 @@ def _parse(pdf) -> ExtractedDocument | None:
             field_type="list",
         ))
 
+    # Pull the signature block (Rector / Decan / Director departament /
+    # Coordonator program studii) from the curriculum pages footer. These
+    # names feed Section 12 (Aprobări) of the FD draft renderer.
+    _extract_signatories(full_text, fields)
+
     # Walk pages, detecting curriculum-year pages by header text.
     current_year: int | None = None
     for page in pdf.pages:
@@ -247,6 +252,114 @@ def _normalize_year_labels(doc: ExtractedDocument) -> None:
         if m:
             base, ystr = m.group(1), int(m.group(2))
             t.name = f"{base}_anul_{label_for.get(ystr, 'i')}"
+
+
+# Title prefix that introduces a person's name in UTCN signature blocks
+# (PROF. DR., CONF. DR., LECT. DR., ASIST. DR., ȘEF LUCR. DR., etc.).
+# Matches at the *start* of a name and is used to split a two-column line
+# (e.g. "CONF. DR. NICUSOR MINCULETE CONF. DR. ALEXANDRA BAICOIANU") into
+# the left and right column names.
+_TITLE_PREFIX_RE = re.compile(
+    r"\b(?:PROF|CONF|LECT|ASIST|[ȘS]EF\s+LUCR)\.?\s*DR\.?",
+    re.IGNORECASE,
+)
+
+
+def _extract_signatories(full_text: str, fields: list[ExtractedField]) -> None:
+    """Extract Rector / Decan / Director departament / Coordonator names.
+
+    Looks for label rows of the form ``RECTOR, DECAN,`` and
+    ``DIRECTOR DEPARTAMENT, COORDONATOR PROGRAM STUDII,`` followed on the
+    next line by the corresponding pair of names. The two columns are
+    glued by ``pdfplumber`` into a single string (e.g. ``"PROF. DR. IOAN
+    VASILE ABRUDAN CONF. DR. ION GABRIEL STAN"``); we split at the second
+    occurrence of a title prefix.
+
+    Stores the first hit (the document repeats the block on every year
+    page) under canonical keys consumed by the FD draft renderer.
+    """
+    lines = full_text.splitlines()
+
+    pairs: list[tuple[str, str, str, str]] = []  # (label_left, label_right, name_left, name_right)
+    for i, line in enumerate(lines[:-1]):
+        upper = line.upper().strip().rstrip(",")
+        nxt = lines[i + 1].strip() if i + 1 < len(lines) else ""
+        if not nxt:
+            continue
+        names = _split_two_column_names(nxt)
+        if names is None:
+            continue
+        left, right = names
+        if "RECTOR" in upper and "DECAN" in upper:
+            pairs.append(("rector", "decanul_facultatii", left, right))
+        elif "DIRECTOR" in upper and "DEPARTAMENT" in upper and "COORDONATOR" in upper:
+            pairs.append(
+                ("directorul_de_departament", "coordonator_program_studii", left, right)
+            )
+
+    seen: set[str] = {f.key for f in fields}
+    for left_key, right_key, left_val, right_val in pairs:
+        if left_key not in seen and left_val:
+            fields.append(ExtractedField(key=left_key, value=left_val, field_type="string"))
+            seen.add(left_key)
+        if right_key not in seen and right_val:
+            fields.append(ExtractedField(key=right_key, value=right_val, field_type="string"))
+            seen.add(right_key)
+
+
+def _split_two_column_names(line: str) -> tuple[str, str] | None:
+    """Split a name-row like ``"PROF. DR. X Y CONF. DR. A B"`` into
+    ``("PROF. DR. X Y", "CONF. DR. A B")`` using title-prefix anchors.
+
+    Returns ``None`` if the line doesn't contain at least two title
+    prefixes (i.e. it is not a two-column signatures row).
+    """
+    matches = list(_TITLE_PREFIX_RE.finditer(line))
+    if len(matches) < 2:
+        return None
+    second = matches[1]
+    left = line[: second.start()].strip(" ,;\t")
+    right = line[second.start() :].strip(" ,;\t")
+    if not left or not right:
+        return None
+    return _normalize_person(left), _normalize_person(right)
+
+
+def _normalize_person(raw: str) -> str:
+    """Pretty-print an upper-case PDF name like ``CONF. DR. NICUSOR MINCULETE``
+    into ``Conf. dr. Nicusor MINCULETE`` so it reads naturally in the FD docx.
+
+    Last-name diacritics cannot be recovered from the PDF text layer, so we
+    keep the surname in CAPS to match the visual style of the printed PI.
+    """
+    raw = re.sub(r"\s+", " ", raw).strip()
+    m = _TITLE_PREFIX_RE.match(raw)
+    if not m:
+        return raw
+    title = m.group(0).rstrip(".").strip()
+    rest = raw[m.end() :].strip(" .,")
+    title_pretty = _pretty_title(title)
+    if not rest:
+        return title_pretty
+    parts = rest.split()
+    if len(parts) >= 2:
+        # Last token = surname (kept caps); everything before = given names.
+        given = " ".join(p.capitalize() for p in parts[:-1])
+        surname = parts[-1].upper()
+        return f"{title_pretty} {given} {surname}"
+    return f"{title_pretty} {parts[0].capitalize()}"
+
+
+def _pretty_title(title_raw: str) -> str:
+    t = re.sub(r"\s+", " ", title_raw).strip().lower()
+    # collapse "prof dr" / "prof. dr" → "Prof. dr."
+    t = t.replace(".", "")
+    parts = [p for p in t.split() if p]
+    if not parts:
+        return ""
+    head = parts[0].capitalize()  # Prof / Conf / Lect / Asist / Sef
+    tail = " ".join(p.lower() for p in parts[1:])  # dr
+    return f"{head}. {tail}." if tail else f"{head}."
 
 
 # Matches lines that introduce a competency definition, e.g.
