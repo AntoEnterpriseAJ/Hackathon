@@ -40,38 +40,6 @@
             <strong>{{ m.new_heading }}</strong>
             <ng-container *ngIf="m.old_heading"> ← {{ m.old_heading }}</ng-container>
             <em *ngIf="m.rationale"> — {{ m.rationale }}</em>
-            <button type="button" class="improve-btn" (click)="openImprove(m)">
-              ✨ Improve with Copilot
-            </button>
-
-            <div class="improve-panel" *ngIf="isImproving(m)">
-              <label>
-                Instrucțiune
-                <textarea
-                  rows="3"
-                  [ngModel]="improveInstruction()"
-                  (ngModelChange)="improveInstruction.set($event)"
-                  placeholder="ex: Detaliază aici 14 săptămâni cu accent pe ML."
-                ></textarea>
-              </label>
-              <div class="improve-actions">
-                <button
-                  type="button"
-                  (click)="runImprove()"
-                  [disabled]="improveLoading() || !improveInstruction().trim()"
-                >
-                  {{ improveLoading() ? 'Generez…' : 'Generează' }}
-                </button>
-                <button type="button" class="secondary" (click)="closeImprove()">
-                  Închide
-                </button>
-              </div>
-              <p class="error" *ngIf="improveError() as err">{{ err }}</p>
-              <div class="proposal" *ngIf="improveProposal() as p">
-                <p class="rationale">{{ p.rationale }}</p>
-                <pre>{{ p.proposed_text }}</pre>
-              </div>
-            </div>
           </li>
         </ul>
       </div>

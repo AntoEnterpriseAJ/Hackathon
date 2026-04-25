@@ -1,11 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 
 import { ShiftReport, SectionMatchReport } from '../models/template-shift.models';
 import { TemplateShiftService } from '../services/template-shift.service';
-import { CopilotService } from '../../copilot/services/copilot.service';
-import { RewriteSectionResponse } from '../../copilot/models/copilot.models';
 
 interface MatchGroup {
   label: string;
@@ -15,13 +12,12 @@ interface MatchGroup {
 @Component({
   selector: 'app-template-shift-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule],
   templateUrl: './template-shift-page.component.html',
   styleUrls: ['./template-shift-page.component.scss'],
 })
 export class TemplateShiftPageComponent {
   private readonly service = inject(TemplateShiftService);
-  private readonly copilot = inject(CopilotService);
 
   readonly oldFd = signal<File | null>(null);
   readonly template = signal<File | null>(null);
@@ -88,58 +84,5 @@ export class TemplateShiftPageComponent {
     return Object.entries(groups)
       .filter(([, v]) => v.length > 0)
       .map(([label, entries]) => ({ label, entries }));
-  }
-
-  // ----- Inline Copilot integration -----
-  readonly improveTarget = signal<SectionMatchReport | null>(null);
-  readonly improveInstruction = signal<string>('');
-  readonly improveLoading = signal(false);
-  readonly improveError = signal<string | null>(null);
-  readonly improveProposal = signal<RewriteSectionResponse | null>(null);
-
-  openImprove(match: SectionMatchReport): void {
-    this.improveTarget.set(match);
-    this.improveInstruction.set('');
-    this.improveProposal.set(null);
-    this.improveError.set(null);
-  }
-
-  closeImprove(): void {
-    this.improveTarget.set(null);
-    this.improveProposal.set(null);
-    this.improveError.set(null);
-  }
-
-  isImproving(match: SectionMatchReport): boolean {
-    return this.improveTarget() === match;
-  }
-
-  runImprove(): void {
-    const target = this.improveTarget();
-    const instruction = this.improveInstruction().trim();
-    if (!target || !instruction) return;
-    this.improveLoading.set(true);
-    this.improveError.set(null);
-    this.improveProposal.set(null);
-    this.copilot
-      .rewriteSection({
-        section_heading: target.new_heading,
-        current_text: target.old_heading
-          ? `(Conținut migrat din "${target.old_heading}"; vezi documentul descărcat.)`
-          : '(Secțiune nouă, fără conținut existent.)',
-        instruction,
-      })
-      .subscribe({
-        next: (resp) => {
-          this.improveProposal.set(resp);
-          this.improveLoading.set(false);
-        },
-        error: (err) => {
-          this.improveError.set(
-            err?.error?.detail ?? err?.message ?? 'Copilot request failed',
-          );
-          this.improveLoading.set(false);
-        },
-      });
   }
 }

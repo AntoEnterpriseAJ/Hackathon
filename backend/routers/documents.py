@@ -49,8 +49,6 @@ from schemas.template_shift import (
     SectionMatchReport,
     ShiftReport,
 )
-from schemas.copilot import RewriteSectionRequest, RewriteSectionResponse
-from services import copilot_service
 
 router = APIRouter()
 
@@ -707,22 +705,3 @@ def _build_shift_report(
         llm_used=llm_available
         and any(m.confidence.startswith("llm-") for m in matches),
     )
-
-
-@router.post("/rewrite-section", response_model=RewriteSectionResponse)
-async def rewrite_section_endpoint(
-    payload: RewriteSectionRequest,
-) -> RewriteSectionResponse:
-    """UC 3.3 — Academic Copilot: rewrite a single FD section per instruction."""
-    if not copilot_service.is_configured():
-        raise HTTPException(
-            status_code=503,
-            detail="Copilot requires ANTHROPIC_API_KEY to be set on the server.",
-        )
-    try:
-        return copilot_service.rewrite_section(payload)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except Exception as exc:  # pragma: no cover - upstream surface
-        traceback.print_exc()
-        raise HTTPException(status_code=502, detail=f"Copilot failed: {exc}") from exc
