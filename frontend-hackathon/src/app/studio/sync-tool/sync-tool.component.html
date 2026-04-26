@@ -25,6 +25,11 @@
     <button class="primary" [disabled]="!canRun()" (click)="run()">
       @if (running()) { Running… } @else { Check sync }
     </button>
+    @if (canDownloadReport()) {
+      <button class="secondary" (click)="downloadReport()" title="Descarcă raport text">
+        📥 Generate report
+      </button>
+    }
   </div>
 
   @if (error()) { <div class="error">⚠ {{ error() }}</div> }

@@ -90,11 +90,11 @@ _ALIASES: dict[str, tuple[str, ...]] = {
         "forma_evaluare",
         "evaluare",
     ),
-    "numar_credite": (
+    "numarul_de_credite": (
         "credite",
         "nr_credite",
+        "numar_credite",
         "numar_de_credite",
-        "numarul_de_credite",
         "puncte_credit",
         "ects",
         "credite_ects",
@@ -157,7 +157,7 @@ def _roman_to_int(s: str) -> int | None:
     return total if total > 0 else None
 
 
-_NUMERIC_FIELDS = {"anul_de_studiu", "semestrul", "numar_credite"}
+_NUMERIC_FIELDS = {"anul_de_studiu", "semestrul", "numarul_de_credite"}
 
 
 def _coerce_numeric(value):

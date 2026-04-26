@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { CaseStore, CaseDocument } from '../case.store';
 import { SyncCheckService } from '../../sync-check/services/sync-check.service';
 import {
+  BibliographyReport,
   CompetencyMapping,
   CrossValidationResult,
   ExtractedDocument,
   GuardViolation,
+  NumericConsistencyReport,
 } from '../../sync-check/models/sync.models';
 import { forkJoin, of, switchMap } from 'rxjs';
 
@@ -29,6 +31,8 @@ export class SyncToolComponent {
   protected readonly mapping = signal<CompetencyMapping | null>(null);
   protected readonly mappingError = signal<string | null>(null);
   protected readonly mappingRunning = signal(false);
+  protected readonly numericReport = signal<NumericConsistencyReport | null>(null);
+  protected readonly bibliographyReport = signal<BibliographyReport | null>(null);
 
   protected readonly fdOptions = computed(() => this.store.documentsByKind().fd);
   protected readonly planOptions = computed(() => this.store.documentsByKind().plan);
@@ -73,6 +77,8 @@ export class SyncToolComponent {
     this.mapping.set(null);
     this.mappingError.set(null);
     this.mappingRunning.set(false);
+    this.numericReport.set(null);
+    this.bibliographyReport.set(null);
     this.running.set(true);
 
     forkJoin({ fd: this.getParsed(fd), plan: this.getParsed(plan) })
@@ -81,6 +87,8 @@ export class SyncToolComponent {
           switchMap((res) => {
             // Kick off competency mapping in the background — non-blocking.
             this.runMapping(fd, plan);
+            this.runNumeric(fd);
+            this.runBibliography(fd);
             return of(res);
           }),
         ),
@@ -116,6 +124,139 @@ export class SyncToolComponent {
 
   protected violationStatus(v: GuardViolation): string {
     return v.code.includes('mismatch') ? '⚠' : '✗';
+  }
+
+  private runNumeric(fd: ExtractedDocument): void {
+    this.service.checkNumericConsistency(fd).subscribe({
+      next: (r) => this.numericReport.set(r),
+      error: () => { /* non-fatal */ },
+    });
+  }
+
+  private runBibliography(fd: ExtractedDocument): void {
+    this.service.checkFdBibliography(fd).subscribe({
+      next: (r) => this.bibliographyReport.set(r),
+      error: () => { /* non-fatal */ },
+    });
+  }
+
+  protected canDownloadReport(): boolean {
+    return !!this.result() && !this.running();
+  }
+
+  protected downloadReport(): void {
+    const text = this.buildReport();
+    if (!text) return;
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const fdDoc = this.store.documents().find((d) => d.id === this.fdId());
+    const stem = (fdDoc?.name ?? 'fd').replace(/\.pdf$/i, '');
+    a.href = url;
+    a.download = `sync-report-${stem}-${stamp}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  private buildReport(): string {
+    const r = this.result();
+    if (!r) return '';
+    const fdDoc = this.store.documents().find((d) => d.id === this.fdId());
+    const planDoc = this.store.documents().find((d) => d.id === this.planId());
+    const lines: string[] = [];
+    lines.push('Raport Sync-Check FD ↔ Plan de Învățământ');
+    lines.push('='.repeat(60));
+    lines.push(`Generat:     ${new Date().toLocaleString('ro-RO')}`);
+    lines.push(`FD:          ${fdDoc?.name ?? '—'}`);
+    lines.push(`Plan:        ${planDoc?.name ?? '—'}`);
+    lines.push('');
+    lines.push(`Disciplină:  ${r.fd_course_name ?? '—'}`);
+    const statusLabel =
+      r.status === 'valid' ? '✅ Aliniat'
+      : r.status === 'invalid' ? '⚠ Inconsistent'
+      : '❓ Nepotrivit';
+    lines.push(`Status:      ${statusLabel}`);
+    lines.push('');
+    if (r.summary) {
+      lines.push(r.summary.trim());
+      lines.push('');
+    }
+
+    if (r.plan_match) {
+      const m = r.plan_match;
+      lines.push('Potrivire în Plan');
+      lines.push(`  Denumire           : ${m.course_name}`);
+      if (m.course_code) lines.push(`  Cod                : ${m.course_code}`);
+      if (m.year != null) lines.push(`  An / Semestru      : ${m.year} / ${m.semester ?? '—'}`);
+      if (m.credits != null) lines.push(`  Credite (Plan)     : ${m.credits}`);
+      if (m.evaluation_form) lines.push(`  Evaluare (Plan)    : ${m.evaluation_form}`);
+      lines.push(`  Tip potrivire      : ${m.match_confidence}`);
+      lines.push('');
+    }
+
+    if (r.field_violations.length) {
+      lines.push('⚠ Inconsistențe administrative');
+      for (const v of r.field_violations) {
+        lines.push(`  - [${v.code}] ${v.message}`);
+      }
+      lines.push('');
+    }
+
+    if (r.competency_violations.length) {
+      lines.push('⚠ Competențe nealiniate');
+      for (const v of r.competency_violations) {
+        lines.push(`  - [${v.code}] ${v.message}`);
+      }
+      lines.push('');
+    }
+
+    if (!r.field_violations.length && !r.competency_violations.length && r.status === 'valid') {
+      lines.push('✅ Toate verificările cross-doc au trecut.');
+      lines.push('');
+    }
+
+    const cm = this.mapping();
+    if (cm) {
+      lines.push('🎯 Hartă competențe (UC 2.2)');
+      lines.push(`  ${cm.summary}`);
+      lines.push(`  Declarate corect : ${cm.declared.length}`);
+      lines.push(`  Necunoscute      : ${cm.unknown.length}`);
+      lines.push(`  Sugerate de AI   : ${cm.recommended.length}`);
+      lines.push('');
+    }
+
+    const nr = this.numericReport();
+    if (nr) {
+      lines.push('🔢 Consistență numerică (UC 1.2)');
+      lines.push(`  ${nr.summary}`);
+      for (const issue of nr.issues) {
+        const icon = issue.severity === 'error' ? '⛔' : issue.severity === 'warning' ? '⚠️' : 'ℹ️';
+        lines.push(`  ${icon} [${issue.code}] ${issue.message}`);
+      }
+      lines.push('');
+    }
+
+    const br = this.bibliographyReport();
+    if (br) {
+      lines.push('📚 Bibliografie (UC 3.1)');
+      lines.push(`  ${br.summary}`);
+      for (const e of br.entries) {
+        const yearLabel = e.latest_year !== null
+          ? (e.age_years !== null ? `${e.latest_year} (${e.age_years} ani)` : `${e.latest_year}`)
+          : 'fără an';
+        const flag = e.issues.length > 0 ? '⚠️' : '✓';
+        const text = e.text.length > 120 ? e.text.slice(0, 117) + '…' : e.text;
+        lines.push(`  ${flag} [${yearLabel}] ${text}`);
+      }
+      lines.push('');
+    }
+
+    lines.push('-'.repeat(60));
+    lines.push('Sfârșitul raportului.');
+    return lines.join('\n');
   }
 
   protected counts() {

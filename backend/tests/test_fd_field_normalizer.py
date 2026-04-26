@@ -32,7 +32,7 @@ def test_aliases_collapse_to_canonical_keys():
     assert "titularul_activitatilor_de_curs" in keys
     assert "titularul_activitatilor_de_seminar_laborator_proiect" in keys
     assert "obiective_generale_ale_disciplinei" in keys
-    assert "numar_credite" in keys
+    assert "numarul_de_credite" in keys
 
 
 def test_numeric_string_coerced_to_number():
@@ -48,7 +48,7 @@ def test_numeric_string_coerced_to_number():
     assert by_key["anul_de_studiu"].value == 3.0
     assert by_key["anul_de_studiu"].field_type == "number"
     assert by_key["semestrul"].value == 2.0
-    assert by_key["numar_credite"].value == 4.5
+    assert by_key["numarul_de_credite"].value == 4.5
 
 
 def test_roman_numeral_coerced_to_number():
@@ -93,7 +93,7 @@ def test_already_canonical_doc_is_idempotent():
         {"key": "titularul_activitatilor_de_curs", "value": "Lect.", "field_type": "string"},
         {"key": "anul_de_studiu", "value": 1.0, "field_type": "number"},
         {"key": "semestrul", "value": 1.0, "field_type": "number"},
-        {"key": "numar_credite", "value": 5.0, "field_type": "number"},
+        {"key": "numarul_de_credite", "value": 5.0, "field_type": "number"},
     ])
 
     out = normalize_fd_fields(doc)
@@ -101,7 +101,7 @@ def test_already_canonical_doc_is_idempotent():
     assert [f.model_dump() for f in out.fields] == [f.model_dump() for f in out2.fields]
     by_key = {f.key: f.value for f in out.fields}
     assert by_key["anul_de_studiu"] == 1.0
-    assert by_key["numar_credite"] == 5.0
+    assert by_key["numarul_de_credite"] == 5.0
 
 
 def test_non_fd_document_untouched():
