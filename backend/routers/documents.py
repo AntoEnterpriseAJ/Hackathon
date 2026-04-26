@@ -43,6 +43,14 @@ from services.parse_cache import parse_cache
 from services.pi_fast_parser import parse_pi as fast_parse_pi
 from services.template_suggester import suggest_template_fixes
 from services.template_validator import validate_template
+from services.template_drafts import (
+    build_schema_and_baseline_drafts_from_template,
+    merge_guard_drafts,
+    select_guards,
+    serialize_guard_drafts,
+)
+# Imported at module level so tests can monkeypatch ``documents.generate_guard_drafts``.
+from services.claude_service import generate_guard_drafts
 from services.docx_section_extractor import extract_sections as extract_docx_sections
 from services.template_filler import fill_template
 from services.template_section_mapper import map_sections
@@ -82,6 +90,12 @@ class SuggestTemplateRequest(BaseModel):
     template: dict[str, Any]
     template_schema: dict[str, Any] = Field(alias="schema")
     guards: list[dict[str, Any]] = []
+
+
+class DraftGuardsRequest(BaseModel):
+    document_type: str
+    template: dict[str, Any]
+    template_schema: dict[str, Any] | None = Field(default=None, alias="schema")
 
 
 class CrossValidateRequest(BaseModel):
@@ -303,6 +317,75 @@ async def suggest(req: SuggestTemplateRequest) -> SemanticSuggestionResult:
         schema=req.template_schema,
         guards=req.guards,
     )
+
+
+@router.post("/draft-guards")
+async def draft_guards(req: DraftGuardsRequest) -> dict[str, Any]:
+    """Build editable guard drafts for a template (baseline + Claude refinement).
+
+    Pipeline:
+      1. Derive a schema and baseline guard drafts from the template values.
+      2. Ask Claude to refine the drafts (rationale + selected suggestion).
+      3. Merge Claude's response onto the baseline (drop unknown fields).
+      4. Materialise the selected guards from each enabled draft.
+    """
+    try:
+        schema, baseline_drafts = build_schema_and_baseline_drafts_from_template(
+            template=req.template,
+            schema=req.template_schema,
+        )
+        try:
+            raw_result = generate_guard_drafts(
+                document_type=req.document_type,
+                template=req.template,
+                schema=schema,
+                baseline_guard_drafts=serialize_guard_drafts(baseline_drafts),
+            )
+        except RuntimeError:
+            # Missing API key or upstream failure — fall back to the baseline.
+            raw_result = None
+
+        merged_drafts = merge_guard_drafts(baseline_drafts, raw_result)
+        guards = [
+            _strip_empty_defaults(g.model_dump(mode="json", exclude_none=True))
+            for g in select_guards(merged_drafts)
+        ]
+        guard_drafts = [
+            _strip_empty_defaults(d) for d in serialize_guard_drafts(merged_drafts)
+        ]
+
+        return {
+            "document_type": req.document_type,
+            "template": req.template,
+            "schema": schema,
+            "guard_drafts": guard_drafts,
+            "guards": guards,
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Draft guards failed: {exc}") from exc
+
+
+def _strip_empty_defaults(value: Any) -> Any:
+    """Drop empty ``fields: []`` and empty ``params: {}`` keys recursively.
+
+    Matches the wire format expected by the frontend / API consumers, which
+    omits guard fields that carry no information.
+    """
+    if isinstance(value, dict):
+        cleaned: dict[str, Any] = {}
+        for k, v in value.items():
+            if k == "fields" and v == []:
+                continue
+            if k == "params" and v == {}:
+                continue
+            cleaned[k] = _strip_empty_defaults(v)
+        return cleaned
+    if isinstance(value, list):
+        return [_strip_empty_defaults(v) for v in value]
+    return value
 
 
 @router.post("/cross-validate", response_model=CrossValidationResult)
