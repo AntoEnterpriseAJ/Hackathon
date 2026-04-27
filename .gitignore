@@ -1,23 +1,25 @@
-# Backend: Python virtual environment and caches
-.agents
-diff-service/.venv/
-diff-service/__pycache__/
-diff-service/**/__pycache__/
-diff-service/**/*.py[cod]
-diff-service/.pytest_cache/
-diff-service/.mypy_cache/
-diff-service/.ruff_cache/
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
-# Backend: local env/config and logs
+# Node / Angular
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+
+# Local env / config
 .env
 .env.*
-diff-service/.env
-diff-service/.env.*
 backend/.env
 backend/.env.*
-diff-service/*.log
-diff-service/coverage/
-diff-service/htmlcov/
 
 # Runtime / debug artifacts
 logs/
@@ -25,6 +27,8 @@ backend/_req.json
 backend/mock-data/pdf-ia-matching/_pi_text.txt
 smoke_test.docx
 
-# Backend: OS/editor noise
-diff-service/.DS_Store
-diff-service/Thumbs.db
+# Editor / OS noise
+.agents
+.vscode/*.log
+.DS_Store
+Thumbs.db
